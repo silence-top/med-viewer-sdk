@@ -1,0 +1,67 @@
+// navigatorSizeRatio: 0.15,
+        // pixelsPerWheelLine: 500, //滚轮缩放灵敏度
+        // crossOriginPolicy: "Anonymous", //解决跨域问题
+        // visibilityRatio: 0.3, //在框中显示的最小比例
+        // // prefixUrl: "./assets/", // OSD 图标资源路径
+
+        // constrainDuringPan: true, //平移时约束，不让移动出去，就是触碰边缘后无法继续移动
+        // useCanvas: false, //是否使用canvas渲染
+        // showNavigator: true, //显示小图
+        // maxImageCacheCount: 100, //最大缓存图像数
+        // navigatorPosition: "TOP_RIGHT", //小图位置,
+        // // navigationControlAnchor: "NONE",//隐藏导航控件
+        // showNavigationControl: false, //工具栏开关
+        // defaultZoomLevel: 0, //缩放级别用于首次打开图片或点击主页按钮时使用。 如果0，则调整以适应观察器。
+        // immediateRender: false, //立即渲染先渲染最接近的关卡，忽略那些降低的关卡 呈现非常模糊到锐利的效果。建议更换 移动设备设置为真。
+        // // alwaysBlend:true, //始终混合图像以获得更好的质量
+        // opacity: 1, //砌图像的默认比例不透明度（1=不透明，0=隐藏） 隐藏图片不会绘制，只有在允许预加载时才加载。
+        // preload: false, //是否预加载图像
+        // placeholderFillStyle: null, //占位符填充样式,
+        // minZoomLevel: null, //最小缩放级别
+        // maxZoomLevel: null, //最大缩放级别，
+        // minZoomImageRatio: 0.9, //最小缩放级别，“图像刚好填满 viewer（fit-to-view）”时的缩放比例上下限，1.0 = 图像刚好完整显示（fit）
+        // maxZoomPixelRatio: 1.1, //最大缩放级别，1.0 = 图像刚好完整显示（fit，
+        // smoothTileEdgesMinZoom: 1.1, //平滑瓷砖边缘的最小缩放级别，1.1 = 图像刚好完整显示（fit）
+        // iOSDevice: false, //是否为 iOS 设备来禁用在 iOS 设备上表现不同的某些功能。
+        // homeFillsViewer: false, //主图填充  不留黑边
+        // degrees: 0, //初始旋转角度
+        // flipped: false, //	初始翻转状态。让图像在某个方向上“无限循环”，像游戏地图一样从一边穿出去从另一边出现
+        // wrapHorizontal: true, //水平循环，让图像在某个方向上“无限循环”，像游戏地图一样从一边穿出去从另一边出现
+        // wrapVertical: true, //垂直循环
+        // navigatorAutoFade: false, //自动淡出
+        // navigatorOpacity: 0.8, //小图透明度
+        // navigatorBackground: "#fff", //	指定导航器小地图的背景颜色
+        // navigatorBorderColor: "#aaa", //小地图边框颜色
+        // navigatorDisplayRegionColor: "#f21616", //小地图框颜色
+        // rotationIncrement: 90, //旋转步长,当旋转按钮或键盘快捷键被激活时，向右或向左旋转的角度数。
+        // maxTilesPerFrame: 2, //每帧加载的瓦片数量。由于客户端机器的帧率通常较高（例如50帧每秒）， 每帧放一格应该是个不错的选择。然而，对于大屏幕或较低帧率，数量 每帧加载的瓦片数可以在这里调整。合理的数值可能是每帧2到3格。 （注意，实际帧率由客户端的浏览器和机器给出。）
+        // // debugMode:true, //调试模式
+        // panHorizontal: true, //允许水平平移
+        // panVertical: true, //允许垂直平移
+        // // clickTimeThreshold: 200,
+        // // clickDistThreshold: 5,
+
+        // // dblClickTimeThreshold: 200,
+        // // dblClickDistThreshold: 5,
+        // springStiffness: 5.0, //springStiffness 越大 → 弹簧越硬 → 动画越快、越“紧”springStiffness 越小 → 弹簧越软 → 动画越慢、越“柔和”
+        // // showSequenceControl: true,
+        // //sequenceMode:true,
+        // minScrollDeltaTime: 20, //滚轮最小时间间隔
+        // animationTime: 1, //动画时间
+        // // springStiffness:5.0, // 动画弹性系数
+        // // 控制鼠标点击时间
+        // gestureSettingsTouch: {
+        //   flickEnabled: false, // 禁用惯性滑动，避免拖拽后延迟
+        //   pinchToZoom: true,
+        //   panToNextImage: false,
+        //   contextMenu: true, // 尝试启用右键菜单
+        // },
+        // gestureSettingsMouse: {
+        //   dragToPan: true, //是否启用拖拽平移
+
+        //   clickToZoom: false, //放大点击手势
+        //   dblClickToZoom: false, //放大双击手势
+        //   contextMenu: true, // 尝试启用右键菜单
+        //   // scrollToZoom: true //是否启用滚动缩放,
+        //   // dblClickDragToZoom: false,
+        // },

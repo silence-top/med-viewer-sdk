@@ -1,0 +1,35 @@
+{
+  "name": "med-viewer-sdk",
+  "version": "0.1.3",
+  "main": "dist/med-viewer-sdk.umd.js",
+  "module": "dist/med-viewer-sdk.mjs",
+  "types": "dist/med-viewer-sdk.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "src"
+  ],
+  "scripts": {
+    "build": "npx vite build && tsc -p tsconfig.dts.json && powershell -Command \"if (Test-Path -Path 'dist\\med-viewer-sdk.d.ts') { Remove-Item -Path 'dist\\med-viewer-sdk.d.ts' } ; Move-Item -Path 'dist\\index.d.ts' -Destination 'dist\\med-viewer-sdk.d.ts'\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "openseadragon": "^3.1.0",
+    "vue": ">=2.7.0 || >=3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.0",
+    "@types/openseadragon": "^5.0.1",
+    "terser": "^5.46.0",
+    "typescript": "^5.0.0",
+    "vite": "^4.0.0",
+    "vue-demi": "*"
+  },
+  "volta": {
+    "node": "22.21.1"
+  },
+  "dependencies": {
+    "annotorious-openseadragon-ld": "^1.0.8",
+    "openseadragon-filtering": "^1.0.0"
+  }
+}
