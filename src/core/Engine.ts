@@ -1,5 +1,5 @@
 import OpenSeadragon from "openseadragon";
-
+import type OpenSeadragonType from "openseadragon";
 // import { KonvaAnnotator } from "./KonvaAnnotator";
 import { AnnoAnnotator } from "./AnnoAnnotator";
 import { MedToolbar, type ToolbarOptions } from "./Toolbar";
@@ -7,19 +7,19 @@ import {
   ColorAdjustPlugin,
   type ColorAdjustOptions,
 } from "./ColorAdjustPlugin";
-import { SelectionPlugin, type SelectionOptions } from './SelectionPlugin';
-import { ScalebarPlugin, type ScalebarOptions } from './Scalebar';
-import { MagnificationPlugin, type MagnificationOptions } from './Magnification';
+import { SelectionPlugin, type SelectionOptions } from "./SelectionPlugin";
+import { ScalebarPlugin, type ScalebarOptions } from "./Scalebar";
+import {
+  MagnificationPlugin,
+  type MagnificationOptions,
+} from "./Magnification";
 
 import { Locale, setLocale } from "./i18n";
 /**
  * 引擎配置接口
  */
 export interface MedEngineOptions {
-  element: HTMLElement; // 承载视图的 DOM 容器
-  tileSource: string | any; // DZI 路径、Tile 配置或 SVS 切片接口
-  navigatorBorderRadius?: number; // 导航器圆角半径
-  prefixUrl?: string; // OSD 图标资源路径
+  osdOptions: OpenSeadragonType.Options;
   locale?: Locale; // 国际化语言设置
   plugins?: {
     annotorious?: boolean | any; // 是否启用 Annotorious 插件
@@ -47,20 +47,19 @@ export class MedViewerEngine {
   private options: MedEngineOptions;
 
   constructor(options: MedEngineOptions) {
-
+    if (!options.osdOptions) {
+      throw new Error("osdOptions is required");
+    }
 
     if (options.locale) {
       setLocale(options.locale);
     }
 
     // 合并默认配置
-    const openseadragonOptions = {
+    const osdOptions: OpenSeadragonType.Options = {
       id: "osd-container",
       crossOriginPolicy: "Anonymous",
-      prefixUrl: options.prefixUrl || '',
-      // --- Viewer 基础 ---
-      //useCanvas: true, // Canvas 渲染更稳定 //已经弃用了
-      // drawer: [ "webgl","canvas"],
+      prefixUrl: options.osdOptions?.prefixUrl || "",
       opacity: 1,
       preload: false,
       immediateRender: false,
@@ -110,28 +109,21 @@ export class MedViewerEngine {
         dragToPan: true,
         clickToZoom: false,
         dblClickToZoom: false,
-        contextMenu: true,
       },
       gestureSettingsTouch: {
         flickEnabled: false,
         pinchToZoom: true,
-        panToNextImage: false,
-        contextMenu: true,
       },
-      plugins: {
-        annotorious: false,
-        toolbar: false,
-        selection: false,
-      },
-      ...options,
-    };
 
-    this.options = openseadragonOptions;
+      ...options.osdOptions,
+    };
+    options.osdOptions = osdOptions;
+
+    this.options = options;
 
     // 1. 初始化 OpenSeadragon
-    this.viewer = OpenSeadragon(this.options);
 
-
+    this.viewer = OpenSeadragon(osdOptions);
 
     // this.viewer.addOnceHandler("open", () => {
     //   this.viewer.viewport && this.viewer.viewport.resize();
@@ -139,29 +131,27 @@ export class MedViewerEngine {
     //   // const isWebGL = this.viewer.drawer instanceof OpenSeadragon.WebGLDrawer;
     // });
 
-this.viewer.addOnceHandler("tile-loaded", () => {
-  // this.viewer.viewport && this.viewer.viewport.resize();
-  this.viewer.viewport.goHome();
+    this.viewer.addOnceHandler("tile-loaded", () => {
+      // this.viewer.viewport && this.viewer.viewport.resize();
+      this.viewer.viewport.goHome();
 
-  console.log("[MedViewerEngine] First tile loaded, refreshing viewer layout.");
-  // console.log(this.viewer.viewport.getBoundsNoRotate());
+      console.log(
+        "[MedViewerEngine] First tile loaded, refreshing viewer layout.",
+      );
+      // console.log(this.viewer.viewport.getBoundsNoRotate());
 
-  // setTimeout(() => {
-  //   this.viewer.viewport && this.viewer.viewport.resize();
-  //   this.viewer.forceRedraw();
-  //   console.log("[MedViewerEngine] Viewer layout refreshed after tile load.");
-  // })
-// this.viewer.viewport.resize(); 
-
-});
-
+      // setTimeout(() => {
+      //   this.viewer.viewport && this.viewer.viewport.resize();
+      //   this.viewer.forceRedraw();
+      //   console.log("[MedViewerEngine] Viewer layout refreshed after tile load.");
+      // })
+      // this.viewer.viewport.resize();
+    });
 
     // 2. 初始化插件
     this.initPlugins();
 
-
-        // 优化：强制刷新 OSD 布局，确保显示完整
-
+    // 优化：强制刷新 OSD 布局，确保显示完整
   }
 
   /**
@@ -185,13 +175,11 @@ this.viewer.addOnceHandler("tile-loaded", () => {
     if (plugins.annotorious) {
       const annoConfig =
         typeof plugins.annotorious === "object" ? plugins.annotorious : {};
-        if(!annoConfig.locale){
-          annoConfig.locale = this.options.locale || 'zh-CN';
-        }
-      
+      if (!annoConfig.locale) {
+        annoConfig.locale = this.options.locale || "zh-CN";
+      }
+
       if (this.viewer.isOpen()) {
-
-
         // 如果已经打开（极少见，除非 TileSource 是同步加载的本地对象）
         this.mountAnnotorious(annoConfig);
       } else {
@@ -228,33 +216,31 @@ this.viewer.addOnceHandler("tile-loaded", () => {
 
     // --- ColorAdjust 插件初始化 ---
     if (plugins.colorAdjust) {
-// 1. 显式提取配置对象，如果是 boolean 则给空对象
-     const config:any= 
-      typeof plugins.colorAdjust === "object" ? plugins.colorAdjust : {};
-    
-    // 2. 传入配置
-     this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
+      // 1. 显式提取配置对象，如果是 boolean 则给空对象
+      const config: any =
+        typeof plugins.colorAdjust === "object" ? plugins.colorAdjust : {};
+
+      // 2. 传入配置
+      this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
       console.log("[MedEngine] ColorAdjust plugin initialized.");
-    // if(this.viewer.isOpen()){
-     
-    // }
-    // else {
-    //   this.viewer.addOnceHandler("open", () => {
-    //     this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
-    //     console.log("[MedEngine] ColorAdjust plugin initialized.");
-    //   });
-    // }
-    
+      // if(this.viewer.isOpen()){
+
+      // }
+      // else {
+      //   this.viewer.addOnceHandler("open", () => {
+      //     this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
+      //     console.log("[MedEngine] ColorAdjust plugin initialized.");
+      //   });
+      // }
     }
 
     // --- Magnification 插件初始化 ---
     if (plugins.magnification) {
-      const config: any = 
+      const config: any =
         typeof plugins.magnification === "object" ? plugins.magnification : {};
       this.magnification = new MagnificationPlugin(this.viewer, config);
       console.log("[MedEngine] Magnification plugin initialized.");
     }
-
   }
 
   /**
@@ -263,13 +249,13 @@ this.viewer.addOnceHandler("tile-loaded", () => {
   private mountAnnotorious(config: any): void {
     try {
       this.anno = new AnnoAnnotator(this, config);
-      console.log("[MedEngine] Annotorious plugin initialized. version: 2.7.17");
+      console.log(
+        "[MedEngine] Annotorious plugin initialized. version: 2.7.17",
+      );
     } catch (error) {
       console.error("[MedEngine] Failed to initialize Annotorious:", error);
     }
   }
-
-
 
   /**
    * 销毁引擎与所有插件
@@ -282,6 +268,5 @@ this.viewer.addOnceHandler("tile-loaded", () => {
     this.scalebar?.destroy();
     this.colorAdjust?.destroy();
     this.viewer.destroy();
-    this.options.element.innerHTML = "";
   }
 }

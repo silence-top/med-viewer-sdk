@@ -1,6 +1,6 @@
 
 declare module 'annotorious-openseadragon-ld';
-declare module '@silence_top/annotorious-openseadragon-ld';
+
 declare module 'openseadragon-filtering';
 
 declare module '*.png' {

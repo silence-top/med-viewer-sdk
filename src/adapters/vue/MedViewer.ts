@@ -19,8 +19,9 @@ export default defineComponent({
     onMounted(() => {
       if (!containerRef.value) return;
       engineRef.value = new MedViewerEngine({
-        element: containerRef.value,
-        ...props.options
+        osdOptions: props.options.osdOptions,
+        locale: props.options.locale,
+        plugins: props.options.plugins,
       });
       emit('ready', engineRef.value);
     });

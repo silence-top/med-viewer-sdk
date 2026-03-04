@@ -132,9 +132,11 @@
 
       // 1. 初始化引擎，同时开启两个插件
       const engine = new MedViewerEngine({
-        id: "app-container",
         locale: "en-US",  
-        tileSources: tileSources,
+        osdOptions: {
+            id: "app-container",
+            tileSources: tileSources,
+        },
         plugins: {
           annotorious: {
             enabled: true,
