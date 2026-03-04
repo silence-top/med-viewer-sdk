@@ -1,6 +1,6 @@
 {
   "name": "med-viewer-sdk",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "dist/med-viewer-sdk.umd.js",
   "module": "dist/med-viewer-sdk.mjs",
   "types": "dist/med-viewer-sdk.d.ts",
