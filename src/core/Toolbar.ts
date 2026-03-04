@@ -3,6 +3,7 @@ import buttonAnno from "@/assets/icons/tool_anno.png";
 import buttonSelection from "@/assets/icons/tool_selection.png";
 import buttonColorAdjust from "@/assets/icons/tool_color.png";
 import buttonReset from "@/assets/icons/tool_reset.png";
+import { t } from "./i18n";
 
 export type ToolbarPosition =
   | "TOP_LEFT"
@@ -40,7 +41,7 @@ const createAnnoDropdownContent = (
 
   let selectedColor = "#ff0000";
   const colorSection = document.createElement("div");
-  colorSection.innerHTML = `<div class="med-toolbar-section-title">标注颜色</div>`;
+  colorSection.innerHTML = `<div class="med-toolbar-section-title">${t('toolbar.annoColor')}</div>`;
   const colorGrid = document.createElement("div");
   colorGrid.className = "med-color-grid";
 
@@ -69,26 +70,25 @@ const createAnnoDropdownContent = (
   container.appendChild(colorSection);
 
   const toolSection = document.createElement("div");
-  toolSection.innerHTML = `<div class="med-toolbar-section-title">标注形状</div>`;
+  toolSection.innerHTML = `<div class="med-toolbar-section-title">${t('toolbar.annoShape')}</div>`;
   const toolGrid = document.createElement("div");
   toolGrid.className = "med-tool-grid";
 
   const tools = [
-    { id: "rect", label: "矩形" },
-    { id: "polygon", label: "多边形" },
-    { id: "circle", label: "圆形" },
-    { id: "ellipse", label: "椭圆" },
-    { id: "line", label: "线段" },
-    { id: "freehand", label: "手绘" },
+    { id: "rect", label: t("toolbar.rect") },
+    { id: "polygon", label: t("toolbar.polygon") },
+    { id: "circle", label: t("toolbar.circle") },
+    { id: "ellipse", label: t("toolbar.ellipse") },
+    { id: "line", label: t("toolbar.line") },
+    { id: "freehand", label: t("toolbar.freehand") },
   ];
 
-  tools.forEach((t) => {
+  tools.forEach((tItem) => {
     const btn = document.createElement("button");
     btn.className = "med-tool-item";
-    btn.textContent = t.label;
+    btn.textContent = tItem.label;
     btn.onclick = () => {
-      engine.setInteractionEffect("anno");
-      if (engine.anno) engine.anno.setTool(t.id as any, selectedColor);
+      if (engine.anno) engine.anno.setTool(tItem.id as any, selectedColor);
       hide();
     };
     toolGrid.appendChild(btn);
@@ -188,6 +188,7 @@ const createColorAdjustDropdownContent = (
   };
 
   // Get current adjustments or defaults
+
   const currentAdjustments = engine.colorAdjust?.adjustments || {
     brightness: 1.0,
     contrast: 1.0,
@@ -202,7 +203,7 @@ const createColorAdjustDropdownContent = (
   // Brightness
   container.appendChild(
     createSlider(
-      "亮度",
+      t("toolbar.brightness"),
       "brightness-slider",
       0.0,
       2.0,
@@ -215,7 +216,7 @@ const createColorAdjustDropdownContent = (
   // Contrast
   container.appendChild(
     createSlider(
-      "对比度",
+      t("toolbar.contrast"),
       "contrast-slider",
       0.0,
       2.0,
@@ -228,7 +229,7 @@ const createColorAdjustDropdownContent = (
   // Saturation
   container.appendChild(
     createSlider(
-      "饱和度",
+      t("toolbar.saturation"),
       "saturation-slider",
       0.0,
       3.0,
@@ -253,7 +254,7 @@ const createColorAdjustDropdownContent = (
   // Hue
   container.appendChild(
     createSlider(
-      "色相",
+      t("toolbar.hue"),
       "hue-slider",
       0,
       360,
@@ -278,7 +279,7 @@ const createColorAdjustDropdownContent = (
   // Gamma
   container.appendChild(
     createSlider(
-      "伽马",
+      t("toolbar.gamma"),
       "gamma-slider",
       0.1,
       3.0,
@@ -291,7 +292,7 @@ const createColorAdjustDropdownContent = (
   // Invert
   container.appendChild(
     createCheckbox(
-      "反色",
+      t("toolbar.invert"),
       "invert-checkbox",
       currentAdjustments.invert || false,
       (val) => engine.colorAdjust?.setAdjustments({ invert: val }),
@@ -301,7 +302,7 @@ const createColorAdjustDropdownContent = (
   // Sepia
   container.appendChild(
     createCheckbox(
-      "怀旧色调",
+      t("toolbar.sepia"),
       "sepia-checkbox",
       currentAdjustments.sepia || false,
       (val) => {
@@ -330,7 +331,7 @@ const createColorAdjustDropdownContent = (
   // Greyscale
   container.appendChild(
     createCheckbox(
-      "灰度",
+      t("toolbar.greyscale"),
       "greyscale-checkbox",
       currentAdjustments.greyscale || false,
       (val) => {
@@ -359,7 +360,7 @@ const createColorAdjustDropdownContent = (
   // Reset Button
   const resetButton = document.createElement("button");
   resetButton.className = "med-main-btn med-reset-btn";
-  resetButton.textContent = "重置";
+  resetButton.textContent = t("toolbar.reset");
   resetButton.onclick = () => {
     engine.colorAdjust?.reset();
 
@@ -404,7 +405,7 @@ const DEFAULT_BUTTONS: ToolbarButton[] = [
   {
     id: "reset",
     icon: buttonReset,
-    label: "重置",
+    label: t("toolbar.reset"),
     onClick: (engine: MedViewerEngine, hide: () => void) => {
       engine.viewer.viewport.goHome();
       hide();
@@ -414,18 +415,18 @@ const DEFAULT_BUTTONS: ToolbarButton[] = [
     id: "anno",
     icon: buttonAnno,
     dropdownContent: createAnnoDropdownContent,
-    label: "标注设置",
+    label: t("toolbar.annoSettings"),
   },
   {
     id: "colorAdjust",
     icon: buttonColorAdjust,
     dropdownContent: createColorAdjustDropdownContent,
-    label: "颜色调整",
+    label: t("toolbar.colorAdjust"),
   },
   {
     id: "selection",
     icon: buttonSelection,
-    label: "截图设置",
+    label: t("toolbar.screenshot"),
     onClick: (engine: MedViewerEngine, hide: () => void) => {
       engine.selection?.toggleState();
       hide();

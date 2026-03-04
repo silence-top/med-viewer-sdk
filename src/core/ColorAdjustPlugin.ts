@@ -1,186 +1,183 @@
-import OpenSeadragon from "openseadragon";
 import "openseadragon-filtering";
 
 export interface ColorAdjustments {
-  brightness?: number; // 0.0 ~ 2.0 (1.0 为默认)
-  contrast?: number;   // 0.0 ~ 2.0 (1.0 为默认)
-  saturation?: number; // 0.0 ~ 3.0 (1.0 为默认)
-  gamma?: number;      // 0.1 ~ 3.0 (1.0 为默认)
-  invert?: boolean;    // 反色
-  hue?: number;        // 0 ~ 360 (0 为默认)
-  sepia?: boolean;     // 怀旧色调
-  greyscale?: boolean; // 灰度化
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+  gamma?: number;
+  hue?: number;
+  invert?: boolean;
+  sepia?: boolean;
+  greyscale?: boolean;
 }
-/**
- * 2. 插件初始化选项接口
- */
+
 export interface ColorAdjustOptions {
   adjustments?: ColorAdjustments;
-  debounceMs?: number;  // 防抖延迟
-  loadMode?: 'async' | 'sync'; // 渲染模式
+  debounceMs?: number; // 建议 60ms 左右，平衡实时性与性能
+  loadMode?: "async" | "sync"; 
 }
 
 export class ColorAdjustPlugin {
   private viewer: any;
   private _adjustments: ColorAdjustments;
+  private options: Required<ColorAdjustOptions>;
+  private lut = new Uint8ClampedArray(256);
+  private needUpdate = true;
+  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-  public get adjustments(): ColorAdjustments {
-    return this._adjustments;
-  }
-  private debounceTimer: number | null = null;
-  private debounceMs: number;
-  private loadMode: 'async' | 'sync';
-
-  constructor(engine: any, options?: ColorAdjustOptions) {
-    this.viewer = engine.viewer || engine;
-    this._adjustments = {
-      brightness: 1.0,
-      contrast: 1.0,
-      saturation: 1.0,
-      gamma: 1.0,
-      hue: 0,
-      invert: false,
-      sepia: false,
-      greyscale: false,
-      ...options?.adjustments,
-    };
-    console.log("ColorAdjustPlugin initialized with adjustments:", this.adjustments);
-    this.debounceMs = options?.debounceMs || 200;
-    this.loadMode = options?.loadMode || 'async';
+  constructor(viewer: any, options?: ColorAdjustOptions) {
+    this.viewer = viewer.viewer || viewer;
     
+    // 默认配置初始化
+    this.options = {
+      adjustments: {
+        brightness: 1.0, contrast: 1.0, saturation: 1.0,
+        gamma: 1.0, hue: 0, invert: false, sepia: false, greyscale: false,
+      },
+      debounceMs: 60,
+      loadMode: "async",
+      ...options
+    };
+
+    this._adjustments = { ...this.options.adjustments };
+
     this.viewer.addHandler("open", () => this.apply());
     if (this.viewer.isOpen()) this.apply();
   }
 
-
-public destroy(): void {
-    // 1. 清理异步定时器
-    if (this.debounceTimer) {
-      window.clearTimeout(this.debounceTimer);
-      this.debounceTimer = null;
-    }
-
-    // 2. 移除事件监听
-    if (this.viewer) {
-      this.viewer.removeHandler("open", this.apply());
-
-      // 3. 清除 OSD 上的滤镜效果，还原图像
-      if (this.viewer.setFilterOptions) {
-        try {
-          this.viewer.setFilterOptions({
-            filters: { processors: [] } 
-          });
-          if (this.viewer.world) this.viewer.world.draw();
-        } catch (e) {
-          console.warn("ColorAdjustPlugin destroy error:", e);
-        }
-      }
-    }
-
-    // 4. 释放引用
-    this.viewer = null;
-    (this._adjustments as any) = null;
-  }
   /**
-   * 核心算法：单次循环处理所有滤镜 (高性能模式)
+   * 更新查找表 (LUT)
+   * 将亮度、对比度、反色、伽马合并为一个 256 长度的数组，大幅减少循环内计算
+   */
+  private updateLut() {
+    const adj = this._adjustments;
+    const invGamma = 1.0 / (adj.gamma || 1.0);
+    const { brightness: br = 1, contrast: co = 1, invert, gamma } = adj;
+
+    for (let i = 0; i < 256; i++) {
+      let v = i;
+      if (invert) v = 255 - v;
+      if (br !== 1.0) v *= br;
+      if (co !== 1.0) v = (v - 128) * co + 128;
+      if (gamma !== 1.0) v = 255 * Math.pow(v / 255, invGamma);
+      this.lut[i] = v; // Uint8ClampedArray 会自动处理 round 和 0-255 截断
+    }
+    this.needUpdate = false;
+  }
+
+  /**
+   * 核心处理器：利用异步调度减少主线程占用
    */
   private combinedProcessor = (context: CanvasRenderingContext2D, callback: () => void) => {
-    const width = context.canvas.width;
-    const height = context.canvas.height;
-    if (width <= 0 || height <= 0) return callback();
-
-    const imageData = context.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    const adj = this.adjustments;
-
-    // 预计算常量减少循环内开销
-    const invGamma = 1.0 / (adj.gamma || 1.0);
-    const contrastFactor = (259 * ((adj.contrast || 1.0) * 255 + 255)) / (255 * (259 - (adj.contrast || 1.0) * 255));
-
-    for (let i = 0; i < data.length; i += 4) {
-      let r = data[i];
-      let g = data[i + 1];
-      let b = data[i + 2];
-
-      // 1. 反色 (Invert)
-      if (adj.invert) {
-        r = 255 - r; g = 255 - g; b = 255 - b;
+    // 1. 将重计算任务推入宏任务队列，让出主线程给 UI 交互（如缩放、拖拽）
+    setTimeout(() => {
+      const { width, height } = context.canvas;
+      if (width <= 0 || height <= 0) {
+        callback();
+        return;
       }
 
-      // 2. 亮度 (Brightness)
-      if (adj.brightness !== 1.0) {
-        r *= adj.brightness!; g *= adj.brightness!; b *= adj.brightness!;
+      if (this.needUpdate) this.updateLut();
+
+      const imageData = context.getImageData(0, 0, width, height);
+      const data = imageData.data;
+      const len = data.length;
+      const lut = this.lut;
+      const { hue = 0, saturation = 1, greyscale, sepia } = this._adjustments;
+
+      // 2. 性能优化：根据滤镜配置选择执行路径，避免循环内部做 if 判断
+      if (greyscale) {
+        for (let i = 0; i < len; i += 4) {
+          const avg = 0.2126 * lut[data[i]] + 0.7152 * lut[data[i + 1]] + 0.0722 * lut[data[i + 2]];
+          data[i] = data[i + 1] = data[i + 2] = avg;
+        }
+      } else if (sepia) {
+        for (let i = 0; i < len; i += 4) {
+          const r = lut[data[i]], g = lut[data[i + 1]], b = lut[data[i + 2]];
+          data[i] = 0.393 * r + 0.769 * g + 0.189 * b;
+          data[i + 1] = 0.349 * r + 0.686 * g + 0.168 * b;
+          data[i + 2] = 0.272 * r + 0.534 * g + 0.131 * b;
+        }
+      } else {
+        // 处理 Hue 和 Saturation
+        const hasHue = hue !== 0;
+        const hasSat = saturation !== 1.0;
+        const angle = hue * (Math.PI / 180);
+        const cosA = Math.cos(angle), sinA = Math.sin(angle);
+        const r1 = cosA + (1-cosA)/3, g1 = 1/3*(1-cosA)-Math.sqrt(1/3)*sinA, b1 = 1/3*(1-cosA)+Math.sqrt(1/3)*sinA;
+        const r2 = 1/3*(1-cosA)+Math.sqrt(1/3)*sinA, g2 = cosA+(1-cosA)/3, b2 = 1/3*(1-cosA)-Math.sqrt(1/3)*sinA;
+        const r3 = 1/3*(1-cosA)-Math.sqrt(1/3)*sinA, g3 = 1/3*(1-cosA)+Math.sqrt(1/3)*sinA, b3 = cosA+(1-cosA)/3;
+
+        for (let i = 0; i < len; i += 4) {
+          let r = lut[data[i]], g = lut[data[i + 1]], b = lut[data[i + 2]];
+          if (hasHue) {
+            const tr = r * r1 + g * r2 + b * r3;
+            const tg = r * g1 + g * g2 + b * g3;
+            const tb = r * b1 + g * b2 + b * b3;
+            r = tr; g = tg; b = tb;
+          }
+          if (hasSat) {
+            const gray = 0.2989 * r + 0.587 * g + 0.114 * b;
+            r = gray + (r - gray) * saturation;
+            g = gray + (g - gray) * saturation;
+            b = gray + (b - gray) * saturation;
+          }
+          data[i] = r; data[i + 1] = g; data[i + 2] = b;
+        }
       }
 
-      // 3. 对比度 (Contrast)
-      if (adj.contrast !== 1.0) {
-        r = (r - 128) * adj.contrast! + 128;
-        g = (g - 128) * adj.contrast! + 128;
-        b = (b - 128) * adj.contrast! + 128;
-      }
-
-      // 4. 伽马校正 (Gamma)
-      if (adj.gamma !== 1.0) {
-        r = 255 * Math.pow(r / 255, invGamma);
-        g = 255 * Math.pow(g / 255, invGamma);
-        b = 255 * Math.pow(b / 255, invGamma);
-      }
-
-      // 5. 灰度 (Greyscale) 或 饱和度 (Saturation) 或 怀旧 (Sepia)
-      if (adj.greyscale) {
-        const avg = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        r = g = b = avg;
-      } else if (adj.sepia) {
-        const tr = 0.393 * r + 0.769 * g + 0.189 * b;
-        const tg = 0.349 * r + 0.686 * g + 0.168 * b;
-        const tb = 0.272 * r + 0.534 * g + 0.131 * b;
-        r = tr; g = tg; b = tb;
-      } else if (adj.saturation !== 1.0) {
-        const gray = 0.2989 * r + 0.587 * g + 0.114 * b;
-        r = gray + (r - gray) * adj.saturation!;
-        g = gray + (g - gray) * adj.saturation!;
-        b = gray + (b - gray) * adj.saturation!;
-      }
-
-      // 边界检查
-      data[i] = Math.min(255, Math.max(0, r));
-      data[i + 1] = Math.min(255, Math.max(0, g));
-      data[i + 2] = Math.min(255, Math.max(0, b));
-    }
-
-    context.putImageData(imageData, 0, 0);
-    callback();
+      context.putImageData(imageData, 0, 0);
+      
+      // 3. 必须调用 callback，告知 OSD 瓦片处理完毕
+      callback();
+    }, 0);
   };
 
+  /**
+   * 应用滤镜配置到 Viewer
+   */
   public apply() {
-    if (this.debounceTimer) window.clearTimeout(this.debounceTimer);
-    
-    this.debounceTimer = window.setTimeout(() => {
-      if (!this.viewer.setFilterOptions) return;
-     console.log(this.adjustments);
-      this.viewer.setFilterOptions({
-        filters: {
-          processors: this.combinedProcessor
-        },
-        loadMode: this.loadMode,
-        debounceMs: this.debounceMs,
-      });
-      
-      // OSD 3.1 强制刷新当前视图
-      if (this.viewer.world) this.viewer.world.draw();
-    }, 20);
+    if (!this.viewer.setFilterOptions) return;
+    this.needUpdate = true;
+
+    this.viewer.setFilterOptions({
+      filters: { processors: this.combinedProcessor },
+      loadMode: this.options.loadMode,
+    });
+
+    // 强制触发可见重绘
+    this.viewer.world.draw();
   }
 
+  /**
+   * 业务层调用的 API，内置防抖
+   */
   public setAdjustments(adj: ColorAdjustments) {
     this._adjustments = { ...this._adjustments, ...adj };
-    this.apply();
+
+    // 性能优化：防抖处理。避免滑动滑块时瞬间产生数百个绘制请求
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+
+    this.debounceTimer = setTimeout(() => {
+      this.apply();
+      this.debounceTimer = null;
+    }, this.options.debounceMs);
+  }
+
+  public get adjustments(): ColorAdjustments {
+    return this._adjustments;
   }
 
   public reset() {
-    this._adjustments = {
-      brightness: 1.0, contrast: 1.0, saturation: 1.0, 
-      gamma: 1.0, hue: 0, invert: false, sepia: false, greyscale: false
-    };
+    this._adjustments = { ...this.options.adjustments };
     this.apply();
+  }
+
+  public destroy() {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    if (this.viewer?.setFilterOptions) {
+      this.viewer.setFilterOptions({ filters: { processors: [] } });
+    }
+    this.viewer = null;
   }
 }

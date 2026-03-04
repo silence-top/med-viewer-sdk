@@ -1,4 +1,5 @@
 import OpenSeadragon from "openseadragon";
+import { t } from "./i18n";
 import "../plugins/openseadragon-selection.js";
 import selectionRest from "@/assets/icons/selection_rest.png";
 import selectionGroup from "@/assets/icons/selection_grouphover.png";
@@ -14,9 +15,9 @@ import selectionCancelHover from "@/assets/icons/selection_cancel_hover.png";
 import selectionCancelDown from "@/assets/icons/selection_cancel_pressed.png";
 
 // 最简单的办法：直接向 OSD 的字符串库注入翻译
-OpenSeadragon.setString("Tooltips.SelectionToggle", "Toggle Selection"); // 切换选择
-OpenSeadragon.setString("Tooltips.SelectionConfirm", "Confirm Selection"); // 确认选择
-OpenSeadragon.setString("Tooltips.SelectionCancel", "Cancel Selection"); // 取消选择
+OpenSeadragon.setString("Tooltips.SelectionToggle", t("selection.toggle")); // 切换选择
+OpenSeadragon.setString("Tooltips.SelectionConfirm", t("selection.confirm")); // 确认选择
+OpenSeadragon.setString("Tooltips.SelectionCancel", t("selection.cancel")); // 取消选择
 
 export interface SelectionOptions {
   element?: HTMLElement | null;
@@ -163,10 +164,6 @@ export class SelectionPlugin {
       // 初始化 selection
       this.selection = (this.viewer as any).selection(this.options);
 
-      console.log(
-        "[SelectionPlugin] Selection plugin initialized",
-        this.selection,
-      );
     } catch (error) {
       console.error(
         "[SelectionPlugin] Failed to initialize selection plugin:",

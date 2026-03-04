@@ -4,6 +4,7 @@ import "annotorious-openseadragon-ld/dist/annotorious.min.css";
 import { MedViewerEngine } from "./Engine";
 import { BaseAnnotator } from "./BaseAnnotator";
 
+
 // // 全局类型声明
 // declare global {
 //   interface Window {
@@ -16,20 +17,12 @@ export class AnnoAnnotator extends BaseAnnotator {
 
   constructor(engine: MedViewerEngine, config: any = {}) {
     super(engine);
-
-    console.log(
-      "[AnnoAnnotator] Initializing Annotorious v2.7.17...",
-      Annotorious,
-    );
-
+   
     // 使用 v2.7.17 的 Annotorious (全局变量)
     this.anno = Annotorious(this.engine.viewer, {
       ...config,
       // 可以在此配置样式、偏好等
     });
-    console.log("[AnnoAnnotator] Annotorious v2.7.17 initialized.", this.anno);
-    console.log("tools", this.anno.listDrawingTools());
-
     this.injectStyles();
     this.initEvents();
   }

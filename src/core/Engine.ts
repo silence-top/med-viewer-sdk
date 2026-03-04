@@ -11,6 +11,7 @@ import { SelectionPlugin, type SelectionOptions } from './SelectionPlugin';
 import { ScalebarPlugin, type ScalebarOptions } from './Scalebar';
 import { MagnificationPlugin, type MagnificationOptions } from './Magnification';
 
+import { Locale, setLocale } from "./i18n";
 /**
  * 引擎配置接口
  */
@@ -19,6 +20,7 @@ export interface MedEngineOptions {
   tileSource: string | any; // DZI 路径、Tile 配置或 SVS 切片接口
   navigatorBorderRadius?: number; // 导航器圆角半径
   prefixUrl?: string; // OSD 图标资源路径
+  locale?: Locale; // 国际化语言设置
   plugins?: {
     annotorious?: boolean | any; // 是否启用 Annotorious 插件
     toolbar?: boolean | ToolbarOptions; // 是否启用工具栏插件
@@ -45,6 +47,12 @@ export class MedViewerEngine {
   private options: MedEngineOptions;
 
   constructor(options: MedEngineOptions) {
+
+
+    if (options.locale) {
+      setLocale(options.locale);
+    }
+
     // 合并默认配置
     const openseadragonOptions = {
       id: "osd-container",
@@ -52,7 +60,7 @@ export class MedViewerEngine {
       prefixUrl: options.prefixUrl || '',
       // --- Viewer 基础 ---
       //useCanvas: true, // Canvas 渲染更稳定 //已经弃用了
-      drawer: [ "webgl","canvas"],
+      // drawer: [ "webgl","canvas"],
       opacity: 1,
       preload: false,
       immediateRender: false,
@@ -91,10 +99,10 @@ export class MedViewerEngine {
 
       // --- 控件 ---
       showNavigationControl: false, // 你自己做 UI 更专业
-      rotationIncrement: 90,
+      // rotationIncrement: 90,
 
       // --- 性能 ---
-      maxTilesPerFrame: 3,
+      // maxTilesPerFrame: 3,
       maxImageCacheCount: 100,
 
       // --- 手势 ---
@@ -124,12 +132,36 @@ export class MedViewerEngine {
     this.viewer = OpenSeadragon(this.options);
 
 
-    this.viewer.addOnceHandler("open", () => {
-      // const isWebGL = this.viewer.drawer instanceof OpenSeadragon.WebGLDrawer;
-    });
+
+    // this.viewer.addOnceHandler("open", () => {
+    //   this.viewer.viewport && this.viewer.viewport.resize();
+    //   this.viewer.forceRedraw();
+    //   // const isWebGL = this.viewer.drawer instanceof OpenSeadragon.WebGLDrawer;
+    // });
+
+this.viewer.addOnceHandler("tile-loaded", () => {
+  // this.viewer.viewport && this.viewer.viewport.resize();
+  this.viewer.viewport.goHome();
+
+  console.log("[MedViewerEngine] First tile loaded, refreshing viewer layout.");
+  // console.log(this.viewer.viewport.getBoundsNoRotate());
+
+  // setTimeout(() => {
+  //   this.viewer.viewport && this.viewer.viewport.resize();
+  //   this.viewer.forceRedraw();
+  //   console.log("[MedViewerEngine] Viewer layout refreshed after tile load.");
+  // })
+// this.viewer.viewport.resize(); 
+
+});
+
 
     // 2. 初始化插件
     this.initPlugins();
+
+
+        // 优化：强制刷新 OSD 布局，确保显示完整
+
   }
 
   /**
@@ -153,8 +185,13 @@ export class MedViewerEngine {
     if (plugins.annotorious) {
       const annoConfig =
         typeof plugins.annotorious === "object" ? plugins.annotorious : {};
-
+        if(!annoConfig.locale){
+          annoConfig.locale = this.options.locale || 'zh-CN';
+        }
+      
       if (this.viewer.isOpen()) {
+
+
         // 如果已经打开（极少见，除非 TileSource 是同步加载的本地对象）
         this.mountAnnotorious(annoConfig);
       } else {
@@ -170,6 +207,7 @@ export class MedViewerEngine {
       const toolbarConfig =
         typeof plugins.toolbar === "object" ? plugins.toolbar : {};
       this.toolbar = new MedToolbar(this, toolbarConfig);
+      console.log("[MedEngine] Toolbar plugin initialized.");
     }
 
     // --- Selection 插件初始化 ---
@@ -177,6 +215,7 @@ export class MedViewerEngine {
       const selectionConfig =
         typeof plugins.selection === "object" ? plugins.selection : {};
       this.selection = new SelectionPlugin(this.viewer, selectionConfig);
+      console.log("[MedEngine] Selection plugin initialized.");
     }
 
     // --- Scalebar 插件初始化 ---
@@ -184,6 +223,7 @@ export class MedViewerEngine {
       const scalebarConfig =
         typeof plugins.scalebar === "object" ? plugins.scalebar : {};
       this.scalebar = new ScalebarPlugin(this.viewer, scalebarConfig);
+      console.log("[MedEngine] Scalebar plugin initialized.");
     }
 
     // --- ColorAdjust 插件初始化 ---
@@ -193,7 +233,18 @@ export class MedViewerEngine {
       typeof plugins.colorAdjust === "object" ? plugins.colorAdjust : {};
     
     // 2. 传入配置
-    this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
+     this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
+      console.log("[MedEngine] ColorAdjust plugin initialized.");
+    // if(this.viewer.isOpen()){
+     
+    // }
+    // else {
+    //   this.viewer.addOnceHandler("open", () => {
+    //     this.colorAdjust = new ColorAdjustPlugin(this.viewer, config);
+    //     console.log("[MedEngine] ColorAdjust plugin initialized.");
+    //   });
+    // }
+    
     }
 
     // --- Magnification 插件初始化 ---
@@ -201,7 +252,9 @@ export class MedViewerEngine {
       const config: any = 
         typeof plugins.magnification === "object" ? plugins.magnification : {};
       this.magnification = new MagnificationPlugin(this.viewer, config);
+      console.log("[MedEngine] Magnification plugin initialized.");
     }
+
   }
 
   /**
@@ -210,35 +263,13 @@ export class MedViewerEngine {
   private mountAnnotorious(config: any): void {
     try {
       this.anno = new AnnoAnnotator(this, config);
-
-      console.log("[MedEngine] Annotorious plugin initialized.", this.anno);
+      console.log("[MedEngine] Annotorious plugin initialized. version: 2.7.17");
     } catch (error) {
       console.error("[MedEngine] Failed to initialize Annotorious:", error);
     }
   }
 
-  /**
-   * 统一切换交互模式
-   * @param mode 'browse' | 'konva' | 'anno'
-   */
-  public setInteractionEffect(mode: "browse" | "konva" | "anno"): void {
-    // 先重置状态
-    // this.konva?.setEnabled(false);
-    this.anno?.setEnabled(false);
 
-    switch (mode) {
-      // case "konva":
-      //   this.konva?.setEnabled(true);
-      //   break;
-      case "anno":
-        this.anno?.setEnabled(true);
-        break;
-      case "browse":
-      default:
-        // 默认 OSD 导航已在上述 setEnabled(false) 中恢复
-        break;
-    }
-  }
 
   /**
    * 销毁引擎与所有插件

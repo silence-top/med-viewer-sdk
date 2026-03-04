@@ -85,7 +85,7 @@ export class MagnificationPlugin {
 
   // 修改 updateMagnificationDisplay 方法
   private updateMagnificationDisplay = (): void => {
-    console.log("updateMagnificationDisplay",this.options);
+  
     if (this.options.type === "LD") {
               const tiledImage = this.viewer.world.getItemAt(0);
       if (!this.magnificationDisplay || !tiledImage) return;
@@ -117,7 +117,7 @@ export class MagnificationPlugin {
       // 如果没有 metadata，我们通常认为 1.0 zoom = 40X (或其他基准)
       const baseMag =
         ((this.viewer as any).source as any)?.max_magnification || 40;
-        console.log(currentZoom, baseMag);
+  
       const magnification = currentZoom * baseMag;
       this.magnificationDisplay.innerHTML = `<span>${magnification.toFixed(2)}X</span>`;
     }

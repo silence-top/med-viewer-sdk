@@ -70,47 +70,43 @@
 
     <script type="module">
       import { MedViewerEngine } from "./src/index.ts";
-      const viewData={
+      const viewData = {
         CameraPixel: "TP_3.45",
         Id: "68cd05e300642632ccdb47e8",
         overViewSizeWidth: 88064,
         overViewSizeHeight: 89088,
         LevelCount: 8,
-        ActualRatio:1,
+        ActualRatio: 1,
         BlockCoreSizeWidth: 1024,
         BlockCoreSizeHeight: 1024,
+      };
+      const baseUrl =
+        "http://192.168.3.24:5000/diagnosis/getLevelImage?BlocksName=Blocks";
+      let CameraPixel = viewData.CameraPixel ? viewData.CameraPixel : "PL_5.86";
+      let CameraPixelNum = parseFloat(CameraPixel.replace(/[^\d.]/g, ""));
+      let ActualRatio = viewData.ActualRatio
+        ? parseFloat(viewData.ActualRatio)
+        : 1;
+      let pixelsPerMeter = (1e6 / CameraPixelNum) * 20 * ActualRatio;
 
-      }
-      const baseUrl = "http://192.168.3.24:5000/diagnosis/getLevelImage?BlocksName=Blocks";
-          let CameraPixel = viewData.CameraPixel
-            ? viewData.CameraPixel
-            : "PL_5.86";
-             let CameraPixelNum = parseFloat(CameraPixel.replace(/[^\d.]/g, ""));
-          let ActualRatio = viewData.ActualRatio
-            ? parseFloat(viewData.ActualRatio)
-            : 1;
-                      let pixelsPerMeter =
-            (1e6 / CameraPixelNum) * 20 * ActualRatio;
+      const tileSources = {
+        height: viewData.overViewSizeHeight,
+        width: viewData.overViewSizeWidth,
+        tileSize: viewData.BlockCoreSizeWidth,
+        minLevel: 1,
+        maxLevel: viewData.LevelCount,
+        getTileUrl: function (level, x, y) {
+          if (level >= viewData.LevelCount + 1) console.log(level, x, y);
+          if (viewData.LevelCount - level >= 0) {
+            return `${baseUrl}&id=${viewData.Id}&level=${
+              viewData.LevelCount - level
+            }&row=${x}&column=${y}`;
+          } else {
+            return null;
+          }
+        },
+      };
 
-const tileSources={
-             height: viewData.overViewSizeHeight,
-              width: viewData.overViewSizeWidth,
-              tileSize: viewData.BlockCoreSizeWidth,
-              minLevel: 1,
-              maxLevel: viewData.LevelCount,
-                            getTileUrl: function (level, x, y) {
-                if (level >= viewData.LevelCount + 1) console.log(level, x, y);
-                if (viewData.LevelCount - level >= 0) {
-                  return `${baseUrl}&id=${viewData.Id}&level=${
-                    viewData.LevelCount - level
-                  }&row=${x}&column=${y}`;
-              
-                } else {
-                  return null;
-                }
-              },
-}
-        
       const toolbarConfig = {
         position: "BOTTOM_CENTER",
         defaultActiveId: "browse",
@@ -130,15 +126,14 @@ const tileSources={
           {
             id: "selection",
             label: "截图设置",
-          }
+          },
         ],
       };
 
       // 1. 初始化引擎，同时开启两个插件
       const engine = new MedViewerEngine({
         id: "app-container",
-        
-
+        locale: "en-US",  
         tileSources: tileSources,
         plugins: {
           annotorious: {
@@ -153,7 +148,7 @@ const tileSources={
           },
           toolbar: toolbarConfig,
           magnification: {
-             type: "LD",
+            type: "LD",
             position: "BOTTOM_LEFT",
             offsetX: 10,
             offsetY: -50,
@@ -187,7 +182,7 @@ const tileSources={
               sepia: false,
               greyscale: false,
             },
-            debounceMs: 200, // 防抖延迟
+            debounceMs: 30, // 防抖延迟
             loadMode: "async", // 渲染模式
           },
           scalebar: {

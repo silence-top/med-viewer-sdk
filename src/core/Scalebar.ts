@@ -67,7 +67,7 @@ export class ScalebarPlugin {
       referenceItemIdx: 0,
       ...options,
     };
-    console.log(this.options);
+
 
     this.init();
   }
@@ -75,6 +75,7 @@ export class ScalebarPlugin {
   private init(): void {
     // Cast viewer to any to access the scalebar method added by the plugin
     (this.viewer as any).scalebar(this.options);
+    this.scalebar = (this.viewer as any).scalebarInstance;
   }
 
   public destroy(): void {
