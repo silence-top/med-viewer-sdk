@@ -1,205 +1,260 @@
-import OpenSeadragon from "openseadragon";
-export type MagnificationType = "LD" | "OSD";
-export type MagnificationPosition =
-  | "TOP_LEFT"
-  | "TOP_CENTER"
-  | "TOP_RIGHT"
-  | "BOTTOM_LEFT"
-  | "BOTTOM_CENTER"
-  | "BOTTOM_RIGHT"
-  | "MIDDLE_LEFT"
-  | "MIDDLE_RIGHT";
+import OpenSeadragon from 'openseadragon'
+export enum MagnificationPosition {
+  TOP_LEFT = 'TOP_LEFT',
+  TOP_CENTER = 'TOP_CENTER',
+  TOP_RIGHT = 'TOP_RIGHT',
+  BOTTOM_LEFT = 'BOTTOM_LEFT',
+  BOTTOM_CENTER = 'BOTTOM_CENTER',
+  BOTTOM_RIGHT = 'BOTTOM_RIGHT',
+  MIDDLE_LEFT = 'MIDDLE_LEFT',
+  MIDDLE_RIGHT = 'MIDDLE_RIGHT'
+}
+export enum MagnificationType {
+  LD = 'LD',
+  OSD = 'OSD'
+}
+// export type MagnificationType = "LD" | "OSD";
+// export type MagnificationPosition =
+//   | "TOP_LEFT"
+//   | "TOP_CENTER"
+//   | "TOP_RIGHT"
+//   | "BOTTOM_LEFT"
+//   | "BOTTOM_CENTER"
+//   | "BOTTOM_RIGHT"
+//   | "MIDDLE_LEFT"
+//   | "MIDDLE_RIGHT";
 
 export interface MagnificationOptions {
-  type?: MagnificationType;
-  position?: MagnificationPosition;
-  offsetX?: number;
-  offsetY?: number;
-  pixelsPerMeter?: number;
+  type?: MagnificationType
+  position?: MagnificationPosition
+  offsetX?: number
+  offsetY?: number
+  pixelsPerMeter?: number
 }
 
 export class MagnificationPlugin {
-  private viewer: OpenSeadragon.Viewer;
-  private options: MagnificationOptions;
-  private magnificationElement: HTMLDivElement | null = null;
-  private magnificationDisplay: HTMLDivElement | null = null;
+  private viewer: OpenSeadragon.Viewer
+  private options: MagnificationOptions
+  private magnificationElement: HTMLDivElement | null = null
+  private magnificationDisplay: HTMLDivElement | null = null
 
-  constructor(
-    viewer: OpenSeadragon.Viewer,
-    options: MagnificationOptions = {},
-  ) {
-    this.viewer = viewer;
-    this.options = options;
-    
+  constructor(viewer: OpenSeadragon.Viewer, options: MagnificationOptions = {}) {
+    this.viewer = viewer
+    this.options = options
 
-    this.init();
+    this.init()
   }
 
   private init(): void {
-    this.injectStyles(); // Inject styles first
+    this.injectStyles() // Inject styles first
 
-    this.magnificationElement = document.createElement("div");
-    this.magnificationElement.className = `med-magnification med-magnification--${this.options.position || "MIDDLE_LEFT"}`;
+    this.magnificationElement = document.createElement('div')
+    this.magnificationElement.className = `med-magnification med-magnification--${this.options.position || 'MIDDLE_LEFT'}`
 
     // Magnification Display
-    this.magnificationDisplay = document.createElement("div");
-    this.magnificationDisplay.className = "med-magnification-display";
-    this.magnificationDisplay.innerHTML = `<span>-</span>`; // Initial empty state
-    this.magnificationElement.appendChild(this.magnificationDisplay);
+    this.magnificationDisplay = document.createElement('div')
+    this.magnificationDisplay.className = 'med-magnification-display'
+    this.magnificationDisplay.innerHTML = `<span>-</span>` // Initial empty state
+    this.magnificationElement.appendChild(this.magnificationDisplay)
 
     // Magnification Buttons
-    const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "med-magnification-buttons";
-    this.magnificationElement.appendChild(buttonsContainer);
+    const buttonsContainer = document.createElement('div')
+    buttonsContainer.className = 'med-magnification-buttons'
+    this.magnificationElement.appendChild(buttonsContainer)
 
-    const magnifications = [40, 20, 10, 4]; // Fixed magnification levels
+    const magnifications = [40, 20, 10, 4] // Fixed magnification levels
     magnifications.forEach((mag) => {
-      const btn = this.createButton(`${mag}X`, () =>
-        this.setMagnification(mag),
-      );
-      buttonsContainer.appendChild(btn);
-    });
+      const btn = this.createButton(`${mag}X`, () => this.setMagnification(mag))
+      buttonsContainer.appendChild(btn)
+    })
 
-    const fitBtn = this.createButton("Fit", () => this.fitToScreen());
-    buttonsContainer.appendChild(fitBtn);
+    const fitBtn = this.createButton('Fit', () => this.fitToScreen())
+    buttonsContainer.appendChild(fitBtn)
 
-    this.viewer.element.appendChild(this.magnificationElement);
+    this.viewer.element.appendChild(this.magnificationElement)
 
     // Add event listeners
-    this.viewer.addHandler("animation", this.updateMagnificationDisplay);
+    this.viewer.addHandler('animation', this.updateMagnificationDisplay)
     // 可选：如果希望在完全静止后也更新一次
-    this.viewer.addHandler("animation-finish", this.updateMagnificationDisplay);
-    this.viewer.addHandler("open", this.updateMagnificationDisplay);
+    this.viewer.addHandler('animation-finish', this.updateMagnificationDisplay)
+    this.viewer.addHandler('open', this.updateMagnificationDisplay)
 
     // Initial update
-    this.updateMagnificationDisplay();
+    this.updateMagnificationDisplay()
   }
 
   private createButton(text: string, onClick: () => void): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.className = "med-magnification-btn";
-    button.textContent = text;
-    button.onclick = onClick;
-    return button;
+    const button = document.createElement('button')
+    button.className = 'med-magnification-btn'
+    button.textContent = text
+    button.onclick = onClick
+    return button
   }
 
   // 修改 updateMagnificationDisplay 方法
   private updateMagnificationDisplay = (): void => {
-  
-    if (this.options.type === "LD") {
-              const tiledImage = this.viewer.world.getItemAt(0);
-      if (!this.magnificationDisplay || !tiledImage) return;
-              const source =
-        ((this.viewer as any).source as any);
-        const width = (source as any).width; 
-         const height = (source as any).height;
-        const pixelsPerMeter = this.options.pixelsPerMeter||((this.viewer as any).scalebarInstance?.pixelsPerMeter || 96);
-        const currentZoom = this.viewer.viewport.getZoom();
-        // const len = Math.max(width, height);
-        const conversionFactor = (20 * 0.0011 * pixelsPerMeter) / width;
-        const magnification = conversionFactor * currentZoom;
-        
-        this.magnificationDisplay.innerHTML = `<span>${magnification.toFixed(2)}X</span>`;
+    if (this.options.type === 'LD') {
+      const tiledImage = this.viewer.world.getItemAt(0)
+      if (!this.magnificationDisplay || !tiledImage) return
+      const source = (this.viewer as any).source as any
+      const width = (source as any).width
+      const height = (source as any).height
+      const pixelsPerMeter =
+        this.options.pixelsPerMeter || (this.viewer as any).scalebarInstance?.pixelsPerMeter || 96
+      const currentZoom = this.viewer.viewport.getZoom()
+      // const len = Math.max(width, height);
+      const conversionFactor = (20 * 0.0011 * pixelsPerMeter) / width
+      const magnification = conversionFactor * currentZoom
 
-
-
+      this.magnificationDisplay.innerHTML = `<span>${magnification.toFixed(2)}X</span>`
     } else {
-      const tiledImage = this.viewer.world.getItemAt(0);
-      if (!this.magnificationDisplay || !tiledImage) return;
+      const tiledImage = this.viewer.world.getItemAt(0)
+      if (!this.magnificationDisplay || !tiledImage) return
 
       // 1. 获取当前图像相对于视口的缩放
       // viewportToImageZoom 将视口缩放转换为图像像素缩放
-      const currentZoom = this.viewer.viewport.viewportToImageZoom(
-        this.viewer.viewport.getZoom(),
-      );
+      const currentZoom = this.viewer.viewport.viewportToImageZoom(this.viewer.viewport.getZoom())
 
       // 2. 假设原始扫描倍率为 40X (通常从 metadata 获取)
       // 如果没有 metadata，我们通常认为 1.0 zoom = 40X (或其他基准)
-      const baseMag =
-        ((this.viewer as any).source as any)?.max_magnification || 40;
-  
-      const magnification = currentZoom * baseMag;
-      this.magnificationDisplay.innerHTML = `<span>${magnification.toFixed(2)}X</span>`;
+      const baseMag = ((this.viewer as any).source as any)?.max_magnification || 40
+
+      const magnification = currentZoom * baseMag
+      this.magnificationDisplay.innerHTML = `<span>${magnification.toFixed(2)}X</span>`
     }
-  };
+  }
+  public getMagnification(): number {
+    const tiledImage = this.viewer.world.getItemAt(0)
+    if (!tiledImage) return 0
+
+    if (this.options.type === 'LD') {
+      const source = (this.viewer as any).source as any
+      const width = source?.width
+      const pixelsPerMeter =
+        this.options.pixelsPerMeter || (this.viewer as any).scalebarInstance?.pixelsPerMeter || 96
+
+      const currentZoom = this.viewer.viewport.getZoom()
+      const conversionFactor = (20 * 0.0011 * pixelsPerMeter) / width
+
+      return conversionFactor * currentZoom
+    }
+
+    // --- OSD 模式 ---
+    const currentZoom = this.viewer.viewport.viewportToImageZoom(this.viewer.viewport.getZoom())
+
+    const baseMag = ((this.viewer as any).source as any)?.max_magnification || 40
+
+    return currentZoom * baseMag
+  }
 
   // 修改 setMagnification 方法
-  private setMagnification(mag: number): void {
-    if (this.options.type === "LD") {
+  private async setMagnification(
+    mag: number,
+    target: { x: number; y: number } | null = null
+  ): Promise<void> {
+    let point = this.viewer.viewport.getCenter()
+    if (target) {
+      point = this.viewer.viewport.imageToViewportCoordinates(target.x, target.y)
+    }
 
-                 const tiledImage = this.viewer.world.getItemAt(0);
-      if (!this.magnificationDisplay || !tiledImage) return;
-              const source =
-        ((this.viewer as any).source as any);
-        const width = (source as any).width; 
-         const height = (source as any).height;
-        const pixelsPerMeter = this.options.pixelsPerMeter||((this.viewer as any).scalebarInstance?.pixelsPerMeter || 96);
-        const currentZoom = this.viewer.viewport.getZoom();
-        // const len = Math.max(width, height);
-        const conversionFactor = (20 * 0.0011 * pixelsPerMeter) / width;
-        const targetZoom = mag / conversionFactor;
-        this.viewer.viewport.zoomTo(targetZoom, this.viewer.viewport.getCenter(), false);
-        this.updateMagnificationDisplay();
+    if (this.options.type === 'LD') {
+      const tiledImage = this.viewer.world.getItemAt(0)
+      if (!this.magnificationDisplay || !tiledImage) return
+      const source = (this.viewer as any).source as any
+      const width = (source as any).width
+      const height = (source as any).height
 
-
-
-
+      const pixelsPerMeter =
+        this.options.pixelsPerMeter || (this.viewer as any).scalebarInstance?.pixelsPerMeter || 96
+      const currentZoom = this.viewer.viewport.getZoom()
+      // const len = Math.max(width, height);
+      const conversionFactor = (20 * 0.0011 * pixelsPerMeter) / width
+      const targetZoom = mag / conversionFactor
+      await this.viewer.viewport.zoomTo(targetZoom, point, false)
+      this.updateMagnificationDisplay()
     } else {
-      const tiledImage = this.viewer.world.getItemAt(0);
-      if (!tiledImage) return;
+      const tiledImage = this.viewer.world.getItemAt(0)
+      if (!tiledImage) return
 
-      const baseMag =
-        ((this.viewer as any).source as any)?.max_magnification || 40;
+      const baseMag = ((this.viewer as any).source as any)?.max_magnification || 40
 
       // 计算目标图像缩放比例 (Target Image Zoom)
       // 例如：目标 20X / 基准 40X = 0.5 图像缩放
-      const targetImageZoom = mag / baseMag;
+      const targetImageZoom = mag / baseMag
 
       // 将图像缩放转换为视口缩放并应用
-      const targetViewportZoom =
-        this.viewer.viewport.imageToViewportZoom(targetImageZoom);
+      const targetViewportZoom = this.viewer.viewport.imageToViewportZoom(targetImageZoom)
 
-      this.viewer.viewport.zoomTo(
-        targetViewportZoom,
-        this.viewer.viewport.getCenter(),
-        false,
-      );
+      await this.viewer.viewport.zoomTo(targetViewportZoom, point, false)
+      this.updateMagnificationDisplay()
     }
   }
 
   private fitToScreen(): void {
-    this.viewer.viewport.fitVertically(true); // Fit to height, true to animate
-    this.viewer.viewport.fitHorizontally(true); // Fit to width
-    this.viewer.viewport.goHome(); // Go to the home position/zoom
+    this.viewer.viewport.fitVertically(true) // Fit to height, true to animate
+    this.viewer.viewport.fitHorizontally(true) // Fit to width
+    this.viewer.viewport.goHome() // Go to the home position/zoom
+  }
+
+  /**
+   * 显示放大镜控件
+   */
+  public show(): void {
+    if (this.magnificationElement) {
+      this.magnificationElement.style.display = 'flex'
+    }
+  }
+
+  /**
+   * 隐藏放大镜控件
+   */
+  public hide(): void {
+    if (this.magnificationElement) {
+      this.magnificationElement.style.display = 'none'
+    }
+  }
+
+  /**
+   * 切换放大镜控件的可见性
+   */
+  public toggle(): void {
+    if (this.magnificationElement) {
+      this.magnificationElement.style.display =
+        this.magnificationElement.style.display === 'none' ? 'flex' : 'none'
+    }
+  }
+
+  /**
+   * 检查放大镜控件是否可见
+   */
+  public isVisible(): boolean {
+    return this.magnificationElement ? this.magnificationElement.style.display !== 'none' : false
   }
 
   public refresh(): void {
-    this.updateMagnificationDisplay();
+    this.updateMagnificationDisplay()
   }
 
   public destroy(): void {
     if (this.magnificationElement) {
-      this.magnificationElement.remove();
-      this.magnificationElement = null;
+      this.magnificationElement.remove()
+      this.magnificationElement = null
     }
     if (this.magnificationDisplay) {
-      this.magnificationDisplay = null;
+      this.magnificationDisplay = null
     }
-    this.viewer.removeHandler("animation", this.updateMagnificationDisplay);
-    this.viewer.removeHandler(
-      "animation-finish",
-      this.updateMagnificationDisplay,
-    );
-    this.viewer.removeHandler("open", this.updateMagnificationDisplay);
-    (this.viewer as any) = null;
+    this.viewer.removeHandler('animation', this.updateMagnificationDisplay)
+    this.viewer.removeHandler('animation-finish', this.updateMagnificationDisplay)
+    this.viewer.removeHandler('open', this.updateMagnificationDisplay)
+    ;(this.viewer as any) = null
   }
 
   private injectStyles(): void {
-    const STYLE_ID = "med-magnification-styles";
-    if (document.getElementById(STYLE_ID)) return;
+    const STYLE_ID = 'med-magnification-styles'
+    if (document.getElementById(STYLE_ID)) return
 
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
+    const style = document.createElement('style')
+    style.id = STYLE_ID
     style.textContent = `
       .med-magnification {
         position: absolute;
@@ -255,7 +310,7 @@ export class MagnificationPlugin {
       .med-magnification-btn:active {
         transform: scale(0.95);
       }
-    `;
-    document.head.appendChild(style);
+    `
+    document.head.appendChild(style)
   }
 }

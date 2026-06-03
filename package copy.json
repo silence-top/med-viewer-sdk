@@ -1,15 +1,16 @@
 {
   "name": "med-viewer-sdk",
-  "version": "0.1.23",
+  "version": "0.1.18",
   "main": "dist/med-viewer-sdk.umd.js",
   "module": "dist/med-viewer-sdk.mjs",
   "types": "dist/med-viewer-sdk.d.ts",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "src"
   ],
   "scripts": {
-    "build": "npx vite build && tsc -p tsconfig.dts.json && powershell -Command \"if (Test-Path -Path 'dist\\med-viewer-sdk.d.ts') { Remove-Item -Path 'dist\\med-viewer-sdk.d.ts' } ; Move-Item -Path 'dist\\index.d.ts' -Destination 'dist\\med-viewer-sdk.d.ts' ; @('dist\\src','dist\\core','dist\\adapters','dist\\i18n','dist\\plugins','dist\\types') | ForEach-Object { if (Test-Path $_) { Remove-Item $_ -Recurse -Force } }\"",
+    "build": "npx vite build && tsc -p tsconfig.dts.json && powershell -Command \"if (Test-Path -Path 'dist\\med-viewer-sdk.d.ts') { Remove-Item -Path 'dist\\med-viewer-sdk.d.ts' } ; Move-Item -Path 'dist\\index.d.ts' -Destination 'dist\\med-viewer-sdk.d.ts'\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "peerDependencies": {

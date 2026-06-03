@@ -76,45 +76,17 @@
         ScalebarLocation,
         ToolbarPosition
       } from './src/index.ts'
-      import ai_json from './1.json'
-      console.log(ai_json)
-
-      const ai_list = []
-      ai_json.forEach((item) => {
-        ai_list.push({
-          x: parseFloat(item.PositionInOverViewX) - 256,
-          y: parseFloat(item.PositionInOverViewY) - 256,
-          width: 512,
-          height: 512,
-          style: { border: '3px solid #f5222d', fontSize: 14 },
-          labels: [
-            {
-              label: 'Class',
-              value: `w:${parseFloat(item.PositionInOverViewX) - 256}, h:${parseFloat(item.PositionInOverViewY) - 256}`,
-              style: { color: '#f5222d' }
-            },
-            {
-              label: 'Name',
-              value: item.ImageName,
-              style: { color: '#f5222d' }
-            }
-          ]
-        })
-      })
-
-      // const ai_json = require('./1.json')
       const viewData = {
         CameraPixel: 'TP_3.45',
         Id: '69a92eae6b948d36f8af170e',
-        overViewSizeWidth: 53248,
-        overViewSizeHeight: 54272,
-        LevelCount: 7,
+        overViewSizeWidth: 128000,
+        overViewSizeHeight: 126976,
+        LevelCount: 8,
         ActualRatio: 1,
         BlockCoreSizeWidth: 1024,
         BlockCoreSizeHeight: 1024
       }
-      const baseUrl =
-        'https://ld-ark-service-ld-ark-qmddmnxxlt.cn-shenzhen.fcapp.run/ark/wsi_level_image?wsi_id=0cc8566a-064d-11f1-a1fd-009027f9d4d6&storage_type=oss&storage_key=ark/demo_data/cervical_cytology/0cc8566a-064d-11f1-a1fd-009027f9d4d6&BlocksName=Blocks'
+      const baseUrl = 'http://192.168.3.24:5000/diagnosis/getLevelImage?BlocksName=Blocks'
       let CameraPixel = viewData.CameraPixel ? viewData.CameraPixel : 'PL_5.86'
       let CameraPixelNum = parseFloat(CameraPixel.replace(/[^\d.]/g, ''))
       let ActualRatio = viewData.ActualRatio ? parseFloat(viewData.ActualRatio) : 1
@@ -154,11 +126,6 @@
             label: '颜色调整'
           },
           {
-            id: 'rotateAdjust',
-            label: '角度调整'
-          },
-
-          {
             id: 'selection',
             label: '截图'
           }
@@ -167,7 +134,7 @@
 
       // 1. 初始化引擎，同时开启两个插件
       const engine = new MedViewerEngine({
-        locale: 'zh-CN',
+        locale: 'en-US',
         osdOptions: {
           id: 'app-container',
           tileSources: tileSources
@@ -183,25 +150,9 @@
               formatter: {
                 pixelsPerMeter: pixelsPerMeter,
                 showMeasure: true
-              },
-              rememberDrawingTools: true
+              }
 
               // 这里可以传入 Annotorious 的配置选项
-            },
-            //被调用
-            onCreateAnnotation: (annotation) => {
-              console.log('标注已创建:', annotation)
-              // 在这里，您可以将标注信息发送到服务器，或者更新您的应用状态
-            },
-
-            // 当一个标注被更新时，这个函数会被调用
-            onUpdateAnnotation: (annotation, previous) => {
-              console.log('标注已更新:', annotation)
-            },
-
-            // 当一个标注被删除时，这个函数会被调用
-            onDeleteAnnotation: (annotation) => {
-              console.log('标注已删除:', annotation)
             }
           },
           toolbar: toolbarConfig,
@@ -215,18 +166,8 @@
             showSelectionControl: true,
             showConfirmDenyButtons: true,
             keyboardShortcut: 's',
-            onSelection: function (rect, blob) {
-              console.log('Selection made:', rect, blob)
-
-              // 处理截图后的逻辑blob下载
-              if (blob) {
-                const url = URL.createObjectURL(blob)
-                const a = document.createElement('a')
-                a.href = url
-                a.download = 'screenshot.png'
-                a.click()
-                URL.revokeObjectURL(url)
-              }
+            onSelection: function (rect) {
+              console.log('Selection made:', rect)
             },
             onSelectionChange: function (rect) {
               console.log('Selection changed:', rect)
@@ -251,10 +192,7 @@
               greyscale: false
             },
             debounceMs: 30, // 防抖延迟
-            loadMode: 'async', // 渲染模式
-            onAdjustmentsChange: (adjustments) => {
-              console.log('颜色参数已改变:', adjustments)
-            }
+            loadMode: 'async' // 渲染模式
           },
           scalebar: {
             type: ScalebarType.MICROSCOPY,
@@ -276,23 +214,60 @@
 
       // 2. 暴露给 window 方便调试
       window.engine = engine
-      console.log('engine', engine)
+      const aiBoxes = [
+        {
+          x: 38213.5 - 256,
+          y: 27078.0 - 256,
+          width: 512,
+          height: 512,
+          style: { border: '3px solid #f5222d', fontSize: 14 },
+          labels: [{ label: 'Class', value: 'ASCUS', style: { color: '#f5222d' } }]
+        },
+        {
+          x: 73434.5 - 256,
+          y: 95156.0 - 256,
+          width: 512,
+          height: 512,
+          style: { border: '3px solid #f5222d', fontSize: 14 },
+          labels: [{ label: 'Class', value: 'LSIL', style: { color: '#f5222d' } }]
+        },
+        {
+          x: 42586.5 - 256,
+          y: 34418.0 - 256,
+          width: 512,
+          height: 512,
+          style: { border: '3px solid #f5222d', fontSize: 14 },
+          labels: [{ label: 'Class', value: 'LSIL', style: { color: '#f5222d' } }]
+        },
+        {
+          x: 72020.0 - 256,
+          y: 22113.5 - 256,
+          width: 512,
+          height: 512,
+          style: { border: '3px solid #f5222d', fontSize: 14 },
+          labels: [{ label: 'Class', value: 'LSIL', style: { color: '#f5222d' } }]
+        },
+        {
+          x: 43047.5 - 256,
+          y: 116256.5 - 256,
+          width: 512,
+          height: 512,
+          style: { border: '3px solid #1890ff', fontSize: 14 },
+          labels: [{ label: 'Class', value: 'EpitheliumNormal', style: { color: '#1890ff' } }]
+        },
+        {
+          x: 15594.5 - 256,
+          y: 59772.0 - 256,
+          width: 512,
+          height: 512,
+          style: { border: '3px solid #1890ff', fontSize: 14 },
+          labels: [{ label: 'Class', value: 'EpitheliumNormal', style: { color: '#1890ff' } }]
+        }
+        // ……其余对象我也可以继续全部转换
+      ]
 
       engine.addOnceHandler('ready', () => {
-        engine.loadAIMarks(ai_list, true)
-        console.log('getMagnification', engine.magnification?.getMagnification())
-        engine.goToPosition(
-          {
-            x: 20000,
-            y: 13000
-          },
-          true,
-          20
-        )
-
-        // engine.magnification?.setMagnification(20).then(() => {
-        //   console.log('setMagnification', engine.magnification?.getMagnification())
-        // })
+        engine.loadAIMarks(aiBoxes, false)
       })
 
       // setTimeout(() => {
@@ -304,12 +279,12 @@
         const magnification = engine.magnification?.getMagnification()
         if (magnification <= 10) {
           if (showAIMarksLabel) {
-            engine.loadAIMarks(ai_list, false)
+            engine.loadAIMarks(aiBoxes, false)
           }
           showAIMarksLabel = false
         } else {
           if (!showAIMarksLabel) {
-            engine.loadAIMarks(ai_list, true)
+            engine.loadAIMarks(aiBoxes, true)
           }
           showAIMarksLabel = true
         }
