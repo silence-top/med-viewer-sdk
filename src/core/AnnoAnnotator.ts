@@ -128,6 +128,7 @@ export class AnnoAnnotator extends BaseAnnotator {
     const style = document.createElement('style')
     style.id = styleId
     style.innerHTML = `
+      /* ── 标注手柄 ── */
       .a9s-handle .a9s-handle-inner {
           stroke: ${cssVar('annoHandleInnerStroke')};
           fill: ${cssVar('annoHandleInnerFill')};
@@ -135,6 +136,107 @@ export class AnnoAnnotator extends BaseAnnotator {
       .a9s-handle .a9s-handle-outer {
           stroke: ${cssVar('annoHandleOuterStroke')};
           fill: ${cssVar('annoHandleOuterFill')};
+      }
+      .a9s-handle:hover .a9s-handle-inner {
+          fill: ${cssVar('annoHandleHoverFill')};
+      }
+
+      /* ── 标注图形边框 ── */
+      .a9s-annotation .a9s-inner,
+      .a9s-selection .a9s-inner {
+          stroke: ${cssVar('annoInnerStroke')};
+      }
+      .a9s-annotation .a9s-inner:hover,
+      .a9s-selection .a9s-inner:hover {
+          stroke: ${cssVar('annoInnerHoverStroke')};
+      }
+      .a9s-annotation .a9s-outer,
+      .a9s-selection .a9s-outer {
+          stroke: ${cssVar('annoOuterStroke')};
+      }
+      .a9s-annotation.selected .a9s-inner,
+      .a9s-annotation.editable .a9s-inner {
+          stroke: ${cssVar('annoInnerHoverStroke')};
+      }
+
+      /* ── improved-polygon ── */
+      .a9s-selection.improved-polygon .a9s-inner,
+      .a9s-annotation.improved-polygon.editable .a9s-inner {
+          stroke: ${cssVar('annoInnerStroke')};
+      }
+      .a9s-selection.improved-polygon .a9s-outer,
+      .a9s-annotation.improved-polygon.editable .a9s-outer {
+          stroke: ${cssVar('annoOuterStroke')};
+      }
+      .a9s-selection.improved-polygon .a9s-handle .a9s-handle-outer,
+      .a9s-annotation.improved-polygon.editable .a9s-handle .a9s-handle-outer {
+          stroke: ${cssVar('annoHandleOuterStroke')};
+      }
+      .a9s-selection.improved-polygon .a9s-handle .a9s-handle-inner,
+      .a9s-annotation.improved-polygon.editable .a9s-handle .a9s-handle-inner {
+          stroke: ${cssVar('annoHandleInnerStroke')};
+          fill: ${cssVar('annoHandleInnerFill')};
+      }
+      .a9s-selection.improved-polygon .a9s-handle .a9s-handle-inner:hover,
+      .a9s-annotation.improved-polygon.editable .a9s-handle.selected .a9s-handle-inner,
+      .a9s-annotation.improved-polygon.editable .a9s-handle .a9s-handle-inner:hover {
+          fill: ${cssVar('annoHandleHoverFill')};
+      }
+
+      /* ── 标注编辑器 ── */
+      .r6o-editor {
+          color: ${cssVar('annoEditorText')};
+      }
+      .r6o-editor .r6o-editor-inner {
+          background-color: ${cssVar('annoEditorBg')};
+          box-shadow: 2px 2px 42px rgba(0,0,0,0.4);
+      }
+      .r6o-editor .r6o-editor-inner .r6o-widget {
+          border-bottom: 1px solid ${cssVar('annoEditorBorder')};
+      }
+      .r6o-editor .r6o-arrow:after {
+          background-color: ${cssVar('annoEditorBg')};
+      }
+
+      /* ── 编辑器按钮 ── */
+      .r6o-btn {
+          background-color: ${cssVar('annoEditorBtnBg')};
+          border: 1px solid ${cssVar('annoEditorBtnBg')};
+          color: ${cssVar('annoEditorBtnColor')};
+      }
+      .r6o-btn:hover {
+          background-color: ${cssVar('annoEditorBtnHoverBg')};
+          border-color: ${cssVar('annoEditorBtnHoverBg')};
+      }
+      .r6o-btn.outline {
+          border: 1px solid ${cssVar('annoEditorBtnBg')};
+          color: ${cssVar('annoEditorBtnBg')};
+          background-color: transparent;
+      }
+
+      /* ── 编辑器输入框 ── */
+      .r6o-autocomplete input,
+      .r6o-widget.r6o-tag input,
+      .r6o-editable-text {
+          color: ${cssVar('annoEditorText')};
+      }
+      .r6o-widget.comment.editable {
+          background-color: ${cssVar('annoEditorInputBg')};
+      }
+      .r6o-widget.r6o-tag {
+          background-color: ${cssVar('annoEditorInputBg')};
+          border-bottom: 1px solid ${cssVar('annoEditorBorder')};
+      }
+      .r6o-widget.r6o-tag ul.r6o-taglist li {
+          background-color: ${cssVar('annoEditorBg')};
+          border: 1px solid ${cssVar('annoEditorBorder')};
+      }
+      .r6o-widget .r6o-lastmodified {
+          border: 1px solid ${cssVar('annoEditorBorder')};
+      }
+      .r6o-widget .r6o-arrow-down {
+          background-color: ${cssVar('annoEditorBg')};
+          border: 1px solid ${cssVar('annoEditorBorder')};
       }`
     document.head.appendChild(style)
   }

@@ -59,6 +59,30 @@ export interface ThemeColors {
   /** 标注手柄外部描边色 */
   annoHandleOuterStroke: string
 
+  /** 标注图形内边框色（选中/绘制态描边） */
+  annoInnerStroke: string
+  /** 标注图形外边框色（阴影/轮廓描边） */
+  annoOuterStroke: string
+  /** 标注图形内边框悬停色 */
+  annoInnerHoverStroke: string
+  /** 标注手柄悬停填充色 */
+  annoHandleHoverFill: string
+
+  /** 标注编辑器背景色 */
+  annoEditorBg: string
+  /** 标注编辑器文字色 */
+  annoEditorText: string
+  /** 标注编辑器边框色 */
+  annoEditorBorder: string
+  /** 标注编辑器输入框背景色 */
+  annoEditorInputBg: string
+  /** 标注编辑器按钮背景色 */
+  annoEditorBtnBg: string
+  /** 标注编辑器按钮悬停背景色 */
+  annoEditorBtnHoverBg: string
+  /** 标注编辑器按钮文字色 */
+  annoEditorBtnColor: string
+
   /** 滑块轨道背景色 */
   sliderTrackBg: string
   /** 滑块拇指色 */
@@ -149,6 +173,19 @@ const DEFAULT_COLORS: ThemeColors = {
   annoHandleInnerStroke: '#FFEB3B',
   annoHandleOuterFill: '#fff',
   annoHandleOuterStroke: '#000',
+  // 标注图形
+  annoInnerStroke: '#31d0aa',
+  annoOuterStroke: 'rgba(0, 0, 0, 0.35)',
+  annoInnerHoverStroke: '#31d0aa',
+  annoHandleHoverFill: '#FFEB3B',
+  // 标注编辑器
+  annoEditorBg: '#181c24',
+  annoEditorText: '#f2f5f8',
+  annoEditorBorder: 'rgba(255,255,255,0.1)',
+  annoEditorInputBg: 'rgba(255,255,255,0.06)',
+  annoEditorBtnBg: '#31d0aa',
+  annoEditorBtnHoverBg: '#25a084',
+  annoEditorBtnColor: '#fff',
   // 滑块
   sliderTrackBg: 'rgba(255, 255, 255, 0.2)',
   sliderThumbColor: '#31d0aa',
@@ -201,6 +238,19 @@ const LIGHT_COLORS: ThemeColors = {
   annoHandleInnerStroke: '#E65100',
   annoHandleOuterFill: '#fff',
   annoHandleOuterStroke: '#333',
+  // 标注图形
+  annoInnerStroke: '#1890ff',
+  annoOuterStroke: 'rgba(0, 0, 0, 0.2)',
+  annoInnerHoverStroke: '#096dd9',
+  annoHandleHoverFill: '#E65100',
+  // 标注编辑器
+  annoEditorBg: '#ffffff',
+  annoEditorText: '#1a1a2e',
+  annoEditorBorder: 'rgba(0, 0, 0, 0.08)',
+  annoEditorInputBg: '#f5f5f5',
+  annoEditorBtnBg: '#1890ff',
+  annoEditorBtnHoverBg: '#096dd9',
+  annoEditorBtnColor: '#fff',
   // 滑块
   sliderTrackBg: 'rgba(0, 0, 0, 0.1)',
   sliderThumbColor: '#1890ff',
@@ -253,6 +303,19 @@ const DARK_COLORS: ThemeColors = {
   annoHandleInnerStroke: '#FFEB3B',
   annoHandleOuterFill: '#222',
   annoHandleOuterStroke: '#888',
+  // 标注图形
+  annoInnerStroke: '#bb86fc',
+  annoOuterStroke: 'rgba(0, 0, 0, 0.5)',
+  annoInnerHoverStroke: '#9b59b6',
+  annoHandleHoverFill: '#FFEB3B',
+  // 标注编辑器
+  annoEditorBg: '#0a0a0e',
+  annoEditorText: '#e8eaed',
+  annoEditorBorder: 'rgba(255,255,255,0.06)',
+  annoEditorInputBg: 'rgba(255,255,255,0.06)',
+  annoEditorBtnBg: '#bb86fc',
+  annoEditorBtnHoverBg: '#9b59b6',
+  annoEditorBtnColor: '#fff',
   // 滑块
   sliderTrackBg: 'rgba(255, 255, 255, 0.15)',
   sliderThumbColor: '#bb86fc',
@@ -310,6 +373,17 @@ const CSS_VAR_MAP: Record<keyof ThemeColors, string> = {
   annoHandleInnerStroke: '--med-anno-handle-inner-stroke',
   annoHandleOuterFill: '--med-anno-handle-outer-fill',
   annoHandleOuterStroke: '--med-anno-handle-outer-stroke',
+  annoInnerStroke: '--med-anno-inner-stroke',
+  annoOuterStroke: '--med-anno-outer-stroke',
+  annoInnerHoverStroke: '--med-anno-inner-hover-stroke',
+  annoHandleHoverFill: '--med-anno-handle-hover-fill',
+  annoEditorBg: '--med-anno-editor-bg',
+  annoEditorText: '--med-anno-editor-text',
+  annoEditorBorder: '--med-anno-editor-border',
+  annoEditorInputBg: '--med-anno-editor-input-bg',
+  annoEditorBtnBg: '--med-anno-editor-btn-bg',
+  annoEditorBtnHoverBg: '--med-anno-editor-btn-hover-bg',
+  annoEditorBtnColor: '--med-anno-editor-btn-color',
   sliderTrackBg: '--med-slider-track-bg',
   sliderThumbColor: '--med-slider-thumb',
   sliderThumbHover: '--med-slider-thumb-hover',
