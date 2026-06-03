@@ -3,6 +3,7 @@ import Annotorious from 'annotorious-openseadragon-ld'
 import 'annotorious-openseadragon-ld/dist/annotorious.min.css'
 import { MedViewerEngine } from './Engine'
 import { BaseAnnotator } from './BaseAnnotator'
+import { cssVar } from './Theme'
 
 export class AnnoAnnotator extends BaseAnnotator {
   public anno: any
@@ -128,12 +129,12 @@ export class AnnoAnnotator extends BaseAnnotator {
     style.id = styleId
     style.innerHTML = `
       .a9s-handle .a9s-handle-inner {
-          stroke: #FFEB3B;
-          fill: #FF9800;
+          stroke: ${cssVar('annoHandleInnerStroke')};
+          fill: ${cssVar('annoHandleInnerFill')};
       }
       .a9s-handle .a9s-handle-outer {
-          stroke: #000;
-          fill: #fff;
+          stroke: ${cssVar('annoHandleOuterStroke')};
+          fill: ${cssVar('annoHandleOuterFill')};
       }`
     document.head.appendChild(style)
   }

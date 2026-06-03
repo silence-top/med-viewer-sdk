@@ -1,5 +1,6 @@
 import OpenSeadragon from "openseadragon";
 import "../plugins/openseadragon-scalebar.js";
+import type { ThemeColors } from './Theme';
 
 export enum ScalebarType {
   NONE = 0,
@@ -76,6 +77,27 @@ export class ScalebarPlugin {
     // Cast viewer to any to access the scalebar method added by the plugin
     (this.viewer as any).scalebar(this.options);
     this.scalebar = (this.viewer as any).scalebarInstance;
+  }
+
+  /**
+   * 更新主题颜色（动态切换主题时调用）
+   */
+  public updateTheme(colors: ThemeColors): void {
+    if (this.scalebar) {
+      // 更新比例尺颜色（scalebar 插件通过 CSS 样式渲染）
+      const scalebarEl = this.scalebar.element || this.scalebar.divElt;
+      if (scalebarEl) {
+        scalebarEl.style.color = colors.textPrimary;
+        scalebarEl.style.borderColor = colors.textPrimary;
+      }
+      // 更新比例尺文本颜色
+      const labels = scalebarEl?.querySelectorAll('.scalebar-label');
+      if (labels) {
+        labels.forEach((label: Element) => {
+          (label as HTMLElement).style.color = colors.textPrimary;
+        });
+      }
+    }
   }
 
   public destroy(): void {

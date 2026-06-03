@@ -11,6 +11,7 @@ import { SelectionPlugin, type SelectionOptions } from './SelectionPlugin'
 import { MedToolbar, type ToolbarOptions } from './Toolbar'
 
 import { Locale, setLocale } from '../i18n/i18n'
+import { ThemeManager, type ThemeConfig, type ThemeColors, cssVar } from './Theme'
 
 export interface AnnotoriousOptions {
   onCreateAnnotation?: (annotation: any) => void
@@ -25,6 +26,7 @@ export interface AnnotoriousOptions {
 export interface MedEngineOptions {
   osdOptions: OpenSeadragonType.Options
   locale?: Locale // 国际化语言设置
+  theme?: ThemeConfig // 主题配置：预设名称 / 自定义主题
   plugins?: {
     annotorious?: boolean | AnnotoriousOptions // 是否启用 Annotorious 插件
     toolbar?: boolean | ToolbarOptions // 是否启用工具栏插件
@@ -83,6 +85,7 @@ export class MedViewerEngine {
   public selection: SelectionPlugin | null = null
   public scalebar: ScalebarPlugin | null = null
   public magnification: MagnificationPlugin | null = null
+  public themeManager: ThemeManager | null = null
   private options: MedEngineOptions
   private events: Map<string, Set<Function>> = new Map()
 
@@ -164,6 +167,9 @@ export class MedViewerEngine {
     // 1. 初始化 OpenSeadragon
 
     this.viewer = OpenSeadragon(osdOptions)
+
+    // 1.5 初始化主题管理器（必须在插件之前，确保 CSS 变量可用）
+    this.themeManager = new ThemeManager(this.viewer.element, options.theme)
 
     // this.viewer.addOnceHandler("open", () => {
     //   this.viewer.viewport && this.viewer.viewport.resize();
@@ -450,6 +456,31 @@ export class MedViewerEngine {
   }
 
   /**
+   * 动态设置主题
+   * @param config 主题配置：预设名称 / ThemeDefinition / Partial<ThemeColors>
+   */
+  public setTheme(config: ThemeConfig): void {
+    if (this.themeManager) {
+      this.themeManager.setTheme(config)
+      // 通知需要感知主题变更的插件
+      if (this.selection) {
+        this.selection.updateTheme(this.themeManager.getColors())
+      }
+      if (this.scalebar) {
+        this.scalebar.updateTheme(this.themeManager.getColors())
+      }
+    }
+    console.log(`[MedEngine] Theme changed to ${this.themeManager?.getThemeName()}`)
+  }
+
+  /**
+   * 获取当前主题颜色
+   */
+  public getThemeColors(): ThemeColors | null {
+    return this.themeManager?.getColors() ?? null
+  }
+
+  /**
    * 销毁引擎与所有插件
    */
   public destroy(): void {
@@ -459,6 +490,7 @@ export class MedViewerEngine {
     this.selection?.destroy()
     this.scalebar?.destroy()
     this.colorAdjust?.destroy()
+    this.themeManager?.destroy()
     this.viewer.destroy()
   }
 

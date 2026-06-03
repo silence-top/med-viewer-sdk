@@ -1,4 +1,5 @@
 import OpenSeadragon from 'openseadragon'
+import { cssVar } from './Theme'
 export enum MagnificationPosition {
   TOP_LEFT = 'TOP_LEFT',
   TOP_CENTER = 'TOP_CENTER',
@@ -263,11 +264,11 @@ export class MagnificationPlugin {
         gap: 8px;
         padding: 10px;
         z-index: 100;
-        background: rgba(24, 28, 36, 0.85);
+        background: ${cssVar('panelBackground')};
         border-radius: 12px;
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border: 1px solid ${cssVar('panelBorder')};
+        box-shadow: ${cssVar('panelShadow')};
       }
       .med-magnification--TOP_LEFT { top: calc(18px + ${this.options.offsetY || 0}px); left: calc(18px + ${this.options.offsetX || 0}px); }
       .med-magnification--TOP_CENTER { top: calc(18px + ${this.options.offsetY || 0}px); left: 50%; transform: translateX(-50%) translateX(${this.options.offsetX || 0}px); }
@@ -279,10 +280,10 @@ export class MagnificationPlugin {
       .med-magnification--MIDDLE_RIGHT { top: 50%; right: calc(18px - ${this.options.offsetX || 0}px); transform: translateY(-50%) translateY(${this.options.offsetY || 0}px); }
 
       .med-magnification-display {
-        background: rgba(255,255,255,0.08);
-        color: #f2f5f8;
+        background: ${cssVar('btnBackground')};
+        color: ${cssVar('textPrimary')};
         font-size: 14px;
-        border: 1px dashed rgba(255,255,255,0.3);
+        border: 1px dashed ${cssVar('sliderTrackBg')};
         padding: 8px 0px;
         border-radius: 8px;
         text-align: center;
@@ -295,8 +296,8 @@ export class MagnificationPlugin {
         gap: 6px;
       }
       .med-magnification-btn {
-        background: rgba(49, 208, 170, 0.15);
-        color: #f2f5f8;
+        background: ${cssVar('accentBgLow')};
+        color: ${cssVar('textPrimary')};
         border: none;
         padding: 8px 16px;
         border-radius: 8px;
@@ -305,7 +306,7 @@ export class MagnificationPlugin {
         font-weight: bold;
       }
       .med-magnification-btn:hover {
-        background: rgba(49, 208, 170, 0.3);
+        background: ${cssVar('accentBgHigh')};
       }
       .med-magnification-btn:active {
         transform: scale(0.95);

@@ -1,7 +1,8 @@
 // 渲染函数写的通用组件
-import { defineComponent, h, onBeforeUnmount, onMounted, shallowRef } from 'vue-demi';
+import { defineComponent, h, onBeforeUnmount, onMounted, shallowRef, watch } from 'vue-demi';
 import type { MedEngineOptions } from '../../core/Engine';
 import { MedViewerEngine } from '../../core/Engine';
+import type { ThemeConfig } from '../../core/Theme';
 
 export default defineComponent({
   name: 'MedViewer',
@@ -9,6 +10,10 @@ export default defineComponent({
     options: {
       type: Object as () => Omit<MedEngineOptions, 'element'>,
       required: true
+    },
+    theme: {
+      type: [String, Object] as unknown as () => ThemeConfig,
+      default: undefined
     }
   },
   emits: ['ready'],
@@ -18,12 +23,21 @@ export default defineComponent({
 
     onMounted(() => {
       if (!containerRef.value) return;
-      engineRef.value = new MedViewerEngine({
+      const engineOptions: MedEngineOptions = {
         osdOptions: props.options.osdOptions,
         locale: props.options.locale,
+        theme: props.theme || props.options.theme,
         plugins: props.options.plugins,
-      });
+      };
+      engineRef.value = new MedViewerEngine(engineOptions);
       emit('ready', engineRef.value);
+    });
+
+    // 监听 theme 变化，动态切换
+    watch(() => props.theme, (newTheme) => {
+      if (newTheme !== undefined && engineRef.value) {
+        engineRef.value.setTheme(newTheme);
+      }
     });
 
     onBeforeUnmount(() => {

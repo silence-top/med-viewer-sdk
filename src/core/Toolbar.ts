@@ -5,6 +5,7 @@ import buttonColorAdjust from '@/assets/icons/tool_color.png'
 import buttonReset from '@/assets/icons/tool_reset.png'
 import buttonRotate from '@/assets/icons/tool_rotate.png'
 import { t } from '../i18n/i18n'
+import { cssVar } from './Theme'
 
 // export type ToolbarPosition =
 //   | "TOP_LEFT"
@@ -865,11 +866,11 @@ export class MedToolbar {
         gap: 12px;
         padding: 10px;
         z-index: 100;
-        background: rgba(24, 28, 36, 0.85);
+        background: ${cssVar('panelBackground')};
         border-radius: 12px;
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        border: 1px solid ${cssVar('panelBorder')};
+        box-shadow: ${cssVar('panelShadow')};
       }
 
       /* 定位 */
@@ -886,8 +887,8 @@ export class MedToolbar {
       
       /* 按钮及动画 */
       .med-main-btn {
-        background: rgba(255,255,255,0.08);
-        color: #f2f5f8;
+        background: ${cssVar('btnBackground')};
+        color: ${cssVar('textPrimary')};
         border: none;
         padding: 8px 16px;
         border-radius: 8px;
@@ -897,20 +898,20 @@ export class MedToolbar {
         align-items: center;
         justify-content: center;
       }
-      .med-main-btn:hover, .med-main-btn.active { background: rgba(49, 208, 170, 0.2); }
+      .med-main-btn:hover, .med-main-btn.active { background: ${cssVar('accentBgHigh')}; }
       .med-main-btn:active { transform: scale(0.9); }
-      .med-main-btn img { width: 24px; height: 24px; }
+      .med-main-btn img { width: 24px; height: 24px; filter: ${cssVar('iconFilter')}; }
 
       /* 下拉框基础及进场动画 */
       .med-toolbar-dropdown {
         position: absolute;
         bottom: calc(100% + 12px); 
         left: 50%;
-        background: #181c24;
-        border: 1px solid rgba(255,255,255,0.1);
+        background: ${cssVar('panelBackgroundSolid')};
+        border: 1px solid ${cssVar('panelBorder')};
         border-radius: 12px;
         padding: 16px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        box-shadow: ${cssVar('panelShadow')};
         min-width: 220px;
         z-index: 101;
         
@@ -955,8 +956,8 @@ export class MedToolbar {
       .med-tooltip {
         position: absolute;
         padding: 6px 10px;
-        background: rgba(0, 0, 0, 0.75);
-        color: #fff;
+        background: ${cssVar('tooltipBg')};
+        color: ${cssVar('tooltipColor')};
         border-radius: 6px;
         font-size: 12px;
         white-space: nowrap;
@@ -1017,13 +1018,13 @@ export class MedToolbar {
       }
 
       /* 内容样式 */
-      .med-toolbar-section-title { font-size: 11px; color: rgba(255,255,255,0.4); margin-bottom: 10px; letter-spacing: 1px; }
+      .med-toolbar-section-title { font-size: 11px; color: ${cssVar('textMuted')}; margin-bottom: 10px; letter-spacing: 1px; }
       .med-color-grid { display: flex; gap: 10px; margin-bottom: 20px; }
       .med-color-item { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-      .med-color-item.active { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 10px rgba(255,255,255,0.3); }
+      .med-color-item.active { border-color: ${cssVar('colorItemActiveBorder')}; transform: scale(1.15); box-shadow: ${cssVar('colorItemActiveShadow')}; }
       .med-tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .med-tool-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: #fff; padding: 8px 4px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.2s; }
-      .med-tool-item:hover { background: rgba(49, 208, 170, 0.2); border-color: rgba(49, 208, 170, 0.4); }
+      .med-tool-item { background: ${cssVar('toolItemBg')}; border: 1px solid ${cssVar('toolItemBorder')}; color: ${cssVar('textPrimary')}; padding: 8px 4px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: 0.2s; }
+      .med-tool-item:hover { background: ${cssVar('toolItemHoverBg')}; border-color: ${cssVar('toolItemHoverBorder')}; }
 
       /* 颜色调整下拉框样式 */
       .med-color-adjust-dropdown {
@@ -1053,14 +1054,14 @@ export class MedToolbar {
       .med-toolbar-section-title {
         margin-bottom: 8px;
         font-size: 13px;
-        color: #f2f5f8;
+        color: ${cssVar('textPrimary')};
       }
 
       .med-toolbar-section input[type="range"] {
         width: 100%;
         -webkit-appearance: none;
         height: 4px;
-        background: rgba(255,255,255,0.2);
+        background: ${cssVar('sliderTrackBg')};
         border-radius: 2px;
         outline: none;
         margin-top: 5px;
@@ -1072,19 +1073,19 @@ export class MedToolbar {
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        background: #31d0aa;
+        background: ${cssVar('sliderThumbColor')};
         cursor: pointer;
-        border: 2px solid #181c24;
+        border: 2px solid ${cssVar('panelBackgroundSolid')};
         transition: background 0.15s ease-in-out;
       }
 
       .med-toolbar-section input[type="range"]::-webkit-slider-thumb:hover {
-        background: #25a084;
+        background: ${cssVar('sliderThumbHover')};
       }
 
       .med-slider-value {
         font-size: 12px;
-        color: rgba(255,255,255,0.7);
+        color: ${cssVar('textSecondary')};
         align-self: flex-end;
       }
 
@@ -1097,7 +1098,7 @@ export class MedToolbar {
 
       .med-checkbox-section label {
         font-size: 13px;
-        color: #f2f5f8;
+        color: ${cssVar('textPrimary')};
         cursor: pointer;
       }
 
@@ -1107,7 +1108,7 @@ export class MedToolbar {
         appearance: none;
         width: 18px;
         height: 18px;
-        border: 1px solid rgba(255,255,255,0.4);
+        border: 1px solid ${cssVar('checkboxBorder')};
         border-radius: 4px;
         background-color: transparent;
         cursor: pointer;
@@ -1116,8 +1117,8 @@ export class MedToolbar {
       }
 
       .med-checkbox-section input[type="checkbox"]:checked {
-        background-color: #31d0aa;
-        border-color: #31d0aa;
+        background-color: ${cssVar('checkboxCheckedBg')};
+        border-color: ${cssVar('checkboxCheckedBg')};
       }
 
       .med-checkbox-section input[type="checkbox"]:checked::after {
@@ -1135,12 +1136,12 @@ export class MedToolbar {
       .med-reset-btn {
         width: 100%;
         margin-top: 15px;
-        background: rgba(200, 50, 50, 0.1);
-        color: #ff6b6b;
-        border: 1px solid rgba(255, 100, 100, 0.2);
+        background: ${cssVar('dangerBgLow')};
+        color: ${cssVar('dangerColor')};
+        border: 1px solid ${cssVar('dangerBgHigh')};
       }
       .med-reset-btn:hover {
-        background: rgba(200, 50, 50, 0.3);
+        background: ${cssVar('dangerBgHigh')};
       }
     `
     document.head.appendChild(style)

@@ -9,6 +9,8 @@
 import OpenSeadragon from 'openseadragon'
 import { t } from '../i18n/i18n'
 import '../plugins/openseadragon-selection.js'
+import type { ThemeColors } from './Theme'
+import { cssVar } from './Theme'
 import selectionRest from '@/assets/icons/selection_rest.png'
 import selectionGroup from '@/assets/icons/selection_grouphover.png'
 import selectionHover from '@/assets/icons/selection_hover.png'
@@ -136,23 +138,23 @@ export class SelectionPlugin {
         }
       },
       borderStyle: {
-        width: '2px', // 稍微加粗，更有质感
-        color: '#4CAF50' // 使用经典的“激活蓝”
+        width: '2px',
+        color: cssVar('selectionColor')
       },
       handleStyle: {
         top: '50%',
         left: '50%',
-        width: '10px', // 增大触点，方便鼠标点击
+        width: '10px',
         height: '10px',
         margin: '-6px 0 0 -6px',
-        background: '#4CAF50', // 白色背景
-        border: '2px solid #4CAF50' // 蓝色边框
+        background: cssVar('selectionColor'),
+        border: `2px solid ${cssVar('selectionHandleBorder')}`
       },
       cornersStyle: {
-        width: '12px', // 角部手柄稍微比边部大一点
+        width: '12px',
         height: '12px',
-        background: '#4CAF50',
-        border: '2px solid #4CAF50'
+        background: cssVar('selectionColor'),
+        border: `2px solid ${cssVar('selectionHandleBorder')}`
       },
       ...options,
       // Override onSelection to provide a blob
@@ -322,6 +324,39 @@ export class SelectionPlugin {
       return this.selection.isSelecting
     }
     return false
+  }
+
+  /**
+   * 更新主题颜色（动态切换主题时调用）
+   */
+  public updateTheme(colors: ThemeColors): void {
+    if (this.selection) {
+      // 更新选区边框颜色
+      if (this.selection.border) {
+        this.selection.border.style.width = '2px'
+        this.selection.border.style.borderColor = colors.selectionColor
+      }
+      // 更新手柄颜色
+      if (this.selection.handles) {
+        const handles = this.selection.handles
+        Object.values(handles).forEach((handle: any) => {
+          if (handle && handle.style) {
+            handle.style.background = colors.selectionColor
+            handle.style.border = `2px solid ${colors.selectionHandleBorder}`
+          }
+        })
+      }
+      // 更新角落手柄
+      if (this.selection.corners) {
+        const corners = this.selection.corners
+        Object.values(corners).forEach((corner: any) => {
+          if (corner && corner.style) {
+            corner.style.background = colors.selectionColor
+            corner.style.border = `2px solid ${colors.selectionHandleBorder}`
+          }
+        })
+      }
+    }
   }
 
   /**
