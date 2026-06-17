@@ -10,7 +10,7 @@ import { ScalebarPlugin, type ScalebarOptions } from './Scalebar'
 import { SelectionPlugin, type SelectionOptions } from './SelectionPlugin'
 import { MedToolbar, type ToolbarOptions } from './Toolbar'
 
-import { Locale, setLocale } from '../i18n/i18n'
+import { Locale, setLocale,getCurrentLocale } from '../i18n/i18n'
 import { ThemeManager, type ThemeConfig, type ThemeColors, cssVar } from './Theme'
 
 export interface AnnotoriousOptions {
@@ -480,6 +480,11 @@ export class MedViewerEngine {
     return this.themeManager?.getColors() ?? null
   }
 
+  public getThemeName(): string | null {
+    return this.themeManager?.getThemeName() ?? null
+  }
+
+
   /**
    * 销毁引擎与所有插件
    */
@@ -517,5 +522,9 @@ export class MedViewerEngine {
     }
 
     console.log(`[MedEngine] Locale changed to ${locale}`)
+  }
+
+  public getLocale(): Locale {
+    return getCurrentLocale()
   }
 }

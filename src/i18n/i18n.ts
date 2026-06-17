@@ -112,3 +112,7 @@ export function t(path: string): string {
   }
   return typeof value === 'string' ? value : path
 }
+
+export function getCurrentLocale(): Locale {
+  return currentLocale
+}
