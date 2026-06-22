@@ -103,18 +103,19 @@
       })
 
       // const ai_json = require('./1.json')
-      const viewData = {
+
+
+            const viewData = {
         CameraPixel: 'TP_3.45',
-        Id: '69a92eae6b948d36f8af170e',
-        overViewSizeWidth: 53248,
-        overViewSizeHeight: 54272,
-        LevelCount: 7,
+        Id: '6a012a72ef0ae390ed4d48f5',
+        overViewSizeWidth: 120894,
+        overViewSizeHeight: 120530,
+        LevelCount: 8,
         ActualRatio: 1,
         BlockCoreSizeWidth: 1024,
         BlockCoreSizeHeight: 1024
       }
-      const baseUrl =
-        'https://ld-ark-service-ld-ark-qmddmnxxlt.cn-shenzhen.fcapp.run/ark/wsi_level_image?wsi_id=0cc8566a-064d-11f1-a1fd-009027f9d4d6&storage_type=oss&storage_key=ark/demo_data/cervical_cytology/0cc8566a-064d-11f1-a1fd-009027f9d4d6&BlocksName=Blocks'
+      const baseUrl = 'http://192.168.3.24:5000/diagnosis/getLevelImage?BlocksName=Blocks'
       let CameraPixel = viewData.CameraPixel ? viewData.CameraPixel : 'PL_5.86'
       let CameraPixelNum = parseFloat(CameraPixel.replace(/[^\d.]/g, ''))
       let ActualRatio = viewData.ActualRatio ? parseFloat(viewData.ActualRatio) : 1
@@ -137,6 +138,7 @@
           }
         }
       }
+
 
       const toolbarConfig = {
         position: ToolbarPosition.BOTTOM_CENTER,
@@ -174,6 +176,8 @@
         id:'theme',
         label: '主题设置',
           onClick: function () {
+            engine.theme = engine.theme === 'default' ? 'dark' : 'default'
+            console.log('theme', engine.theme)
         
         }
       },
@@ -186,7 +190,8 @@
         theme: 'default',
         osdOptions: {
           id: 'app-container',
-          tileSources: tileSources
+          tileSources: tileSources,
+
         },
 
         plugins: {
