@@ -14,21 +14,21 @@ function getWithUnit(value: number, unitSuffix: string): string {
   if (isArea) {
     // 面积单位：μm² → mm² → m²
     if (value >= 1e12) {
-      return (value / 1e12).toFixed(2) + ' ' + baseSuffix + '²'
+      return (value / 1e12).toFixed(2) + '&nbsp;' + baseSuffix + '²'
     }
     if (value >= 1e6) {
-      return (value / 1e6).toFixed(2) + ' m' + baseSuffix + '²'
+      return (value / 1e6).toFixed(2) + '&nbsp;m' + baseSuffix + '²'
     }
-    return value.toFixed(2) + ' μ' + baseSuffix + '²'
+    return value.toFixed(2) + '&nbsp;μ' + baseSuffix + '²'
   } else {
     // 长度单位：μm → mm → m
     if (value >= 1e6) {
-      return (value / 1e6).toFixed(2) + ' ' + baseSuffix
+      return (value / 1e6).toFixed(2) + '&nbsp;' + baseSuffix
     }
     if (value >= 1e3) {
-      return (value / 1e3).toFixed(2) + ' m' + baseSuffix
+      return (value / 1e3).toFixed(2) + '&nbsp;m' + baseSuffix
     }
-    return value.toFixed(2) + ' μ' + baseSuffix
+    return value.toFixed(2) + '&nbsp;μ' + baseSuffix
   }
 }
 
