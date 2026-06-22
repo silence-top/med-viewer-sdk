@@ -133,6 +133,7 @@ export class MedViewerEngine {
       showNavigator: true,
       navigatorSizeRatio: 0.15,
       navigatorPosition: 'TOP_RIGHT',
+
       navigatorAutoFade: false,
       navigatorOpacity: 0.8,
       navigatorBackground: '#fff',
@@ -165,11 +166,15 @@ export class MedViewerEngine {
     this.options = options
 
     // 1. 初始化 OpenSeadragon
+    // console.log('[MedViewerEngine] Initializing OpenSeadragon...',osdOptions)
 
     this.viewer = OpenSeadragon(osdOptions)
 
     // 1.5 初始化主题管理器（必须在插件之前，确保 CSS 变量可用）
     this.themeManager = new ThemeManager(this.viewer.element, options.theme)
+
+    // 1.6 Navigator 圆角样式
+    this.injectNavigatorStyles()
 
     // this.viewer.addOnceHandler("open", () => {
     //   this.viewer.viewport && this.viewer.viewport.resize();
@@ -484,6 +489,23 @@ export class MedViewerEngine {
     return this.themeManager?.getThemeName() ?? null
   }
 
+
+  /**
+   * 为 Navigator 小图添加圆角样式
+   */
+  private injectNavigatorStyles(): void {
+    const STYLE_ID = 'med-navigator-styles'
+    if (document.getElementById(STYLE_ID)) return
+    const style = document.createElement('style')
+    style.id = STYLE_ID
+    style.textContent = `
+      .navigator {
+        border-radius: 8px;
+        overflow: hidden;
+      }
+    `
+    document.head.appendChild(style)
+  }
 
   /**
    * 销毁引擎与所有插件

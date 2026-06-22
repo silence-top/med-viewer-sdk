@@ -415,6 +415,20 @@ export function cssVar(key: keyof ThemeColors): string {
 }
 
 /**
+ * 需要同步写入 :root 的 CSS 变量键（供 .r6o-editor 等挂载在 body 下的 Annotorious 元素使用）
+ * 这些元素不在 OSD 容器的 CSS 变量继承链内，需要额外提升到全局作用域
+ */
+const GLOBAL_ANNO_EDITOR_KEYS: (keyof ThemeColors)[] = [
+  'annoEditorBg',
+  'annoEditorText',
+  'annoEditorBorder',
+  'annoEditorInputBg',
+  'annoEditorBtnBg',
+  'annoEditorBtnHoverBg',
+  'annoEditorBtnColor'
+]
+
+/**
  * 主题管理器
  */
 export class ThemeManager {
@@ -462,6 +476,7 @@ export class ThemeManager {
 
   /**
    * 将主题颜色应用为 CSS 变量到容器元素
+   * 同时将 annoEditor* 相关变量提升到 :root，供 .r6o-editor（挂载在 body 下）使用
    */
   private applyTheme(colors: ThemeColors): void {
     const keys = Object.keys(CSS_VAR_MAP) as (keyof ThemeColors)[]
@@ -469,6 +484,11 @@ export class ThemeManager {
       const value = colors[key]
       if (value !== undefined) {
         this.container.style.setProperty(CSS_VAR_MAP[key], value)
+        // 将 annoEditor* 变量额外写入 :root，解决 .r6o-editor 不在 OSD 容器 CSS 作用域内的问题
+        if (GLOBAL_ANNO_EDITOR_KEYS.includes(key)) {
+          document.documentElement.style.setProperty(CSS_VAR_MAP[key], value)
+        }
+        
       }
     })
   }
@@ -511,6 +531,10 @@ export class ThemeManager {
     const keys = Object.keys(CSS_VAR_MAP) as (keyof ThemeColors)[]
     keys.forEach((key) => {
       this.container.style.removeProperty(CSS_VAR_MAP[key])
+      // 同步清除提升到 :root 的 annoEditor* 变量
+      if (GLOBAL_ANNO_EDITOR_KEYS.includes(key)) {
+        document.documentElement.style.removeProperty(CSS_VAR_MAP[key])
+      }
     })
   }
 }

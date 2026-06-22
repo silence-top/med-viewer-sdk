@@ -57,6 +57,13 @@ export interface ToolbarOptions {
  */
 const createAnnoDropdownContent = (engine: MedViewerEngine, hide: () => void): HTMLElement => {
 
+  // 插件未就绪：返回友好提示面板
+  if (!engine.anno) {
+    const tip = document.createElement('div')
+    tip.className = 'med-toolbar-dropdown-inner med-plugin-unavailable'
+    tip.innerHTML = `<p>标注插件未启用，请在 plugins.annotorious 中开启</p>`
+    return tip
+  }
 
   const container = document.createElement('div')
   container.className = 'med-toolbar-dropdown-inner'
@@ -139,6 +146,13 @@ const createColorAdjustDropdownContent = (
   engine: MedViewerEngine,
   hide: () => void
 ): HTMLElement => {
+  // 插件未就绪：返回友好提示面板
+  if (!engine.colorAdjust) {
+    const tip = document.createElement('div')
+    tip.className = 'med-toolbar-dropdown-inner med-plugin-unavailable'
+    tip.innerHTML = `<p>颜色调整插件未启用，请在 plugins.colorAdjust 中开启</p>`
+    return tip
+  }
   const container = document.createElement('div')
   container.className = 'med-toolbar-dropdown-inner med-color-adjust-dropdown'
   if (engine.anno) engine.anno.setEnabled(false)
@@ -544,9 +558,13 @@ const DEFAULT_BUTTONS: ToolbarButton[] = [
     icon: buttonSelection,
     label: t('toolbar.screenshot'),
     onClick: (engine: MedViewerEngine, hide: () => void) => {
-      //启用的时候这个按钮应该是有启用颜色的
+      if (!engine.selection) {
+        console.warn('[MedToolbar] 截图插件未启用，请在 plugins.selection 中开启')
+        hide()
+        return
+      }
       console.log('selection toggleState')
-      engine.selection?.toggleState()
+      engine.selection.toggleState()
       if (engine.anno) {
         engine.anno.setEnabled(false)
       }
@@ -1142,6 +1160,17 @@ export class MedToolbar {
       }
       .med-reset-btn:hover {
         background: ${cssVar('dangerBgHigh')};
+      }
+      .med-plugin-unavailable {
+        min-width: 200px;
+        padding: 16px 12px;
+        text-align: center;
+      }
+      .med-plugin-unavailable p {
+        margin: 0;
+        font-size: 13px;
+        color: ${cssVar('textMuted')};
+        line-height: 1.5;
       }
     `
     document.head.appendChild(style)

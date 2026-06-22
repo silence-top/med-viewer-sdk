@@ -8,6 +8,7 @@ import { cssVar } from './Theme'
 export class AnnoAnnotator extends BaseAnnotator {
   public anno: any
   private listeners: Map<string, Function[]> = new Map()
+  private injectedStyleEl: HTMLStyleElement | null = null
   constructor(engine: MedViewerEngine, config: any = {}) {
     super(engine)
     // 使用 v2.7.17 的 Annotorious (全局变量)
@@ -75,6 +76,9 @@ export class AnnoAnnotator extends BaseAnnotator {
 
   public destroy(): void {
     this.anno.destroy()
+    // 销毁时移除本实例注入的样式
+    this.injectedStyleEl?.remove()
+    this.injectedStyleEl = null
   }
 
   private initEvents(config: any) {
@@ -122,11 +126,11 @@ export class AnnoAnnotator extends BaseAnnotator {
   }
 
   private injectStyles() {
-    // 适配医学影像的样式（v2.7.17 默认样式有时在深色背景下不明显）
-    const styleId = 'med-anno-v2-7-17-overrides'
-    if (document.getElementById(styleId)) return
+    // 每个实例独立注入一个 <style>，并保存引用以便 destroy() 时清除
+    // 不再使用 styleId 去重，改为实例级生命周期管理
     const style = document.createElement('style')
-    style.id = styleId
+    style.setAttribute('data-med-anno-instance', 'true')
+    this.injectedStyleEl = style
     style.innerHTML = `
       /* ── 标注手柄 ── */
       .a9s-handle .a9s-handle-inner {
