@@ -11,6 +11,8 @@
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": false,
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
